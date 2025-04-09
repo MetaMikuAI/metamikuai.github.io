@@ -9,7 +9,7 @@
     <meta http-equiv="Cache-Control" content="no-siteapp">
     <title>
         
-            【半整活】把百度网盘塞进docker里
+            归档
         
     </title>
     <link rel="shortcut icon" href="#"/>
@@ -32,32 +32,15 @@
 <meta name="generator" content="Hexo 7.1.1"></head>
 <body>
     <a id="cover"></a>
-    <link type="text/css" rel="stylesheet" href="/css/post.css">
+    <link type="text/css" rel="stylesheet" href="/css/archive.css">
 <div id="header" class="header">
     <div class="vertical">
         <div class="inner">
             
-                <h1 class="header-subtitle">【半整活】把百度网盘塞进docker里</h1>
+                <h1 class="header-subtitle">归档</h1>
                 <div class="header-subinfo">
-                    <p class="article-info-text">
-                        <span>
-                            <i class="iconfont icon-time"></i> 发表时间：2025-01-30
-                        </span>
-                        
-                            
-                                <span id="/2025/01/30/【半整活】把百度网盘塞进docker里/" class="leancloud_visitors" data-flag-title="【半整活】把百度网盘塞进docker里">
-                                    <i class="iconfont icon-browse"></i> 阅读：<sapn class="leancloud-visitors-count"></span>
-                                </span>
-                            
-                            
-                                <span>
-                                    <i class="iconfont icon-interactive"></i> 评论：<span class="valine-comment-count" data-xid="/2025/01/30/【半整活】把百度网盘塞进docker里/"></span>
-                                </span>
-                              
-                        
-                    </p>
-                    
-                    
+                    <p class="article-info-text Chinese"></p>
+                    <p class="article-info-text English"></p>                  
                 </div>
             
         </div>
@@ -66,156 +49,39 @@
 </div>
 <div id="container">
     
-        <!-- 文章页面 -->
-        <div id="article">
-            <div class="toc"></div>
-            <div class="article-body">
-                <h4 id="前言">前言</h4>
-<p>以前电脑装上百度网盘之后，总是在我的注册表里到处倒垃圾，右键菜单、explorer到处都能看到，删掉之后还能继续拉，时不时还会自己出错让我不得不重新安装，还有他们抽象的UI设计，真的很烦人。我有一点轻度的赛博洁癖，于是把百度网盘删了装进了
-Hyper-V 虚拟机里面，干净了不少，但是不是很方便，每次启动要先去服务里启动
-Hyper-V，然后启动虚拟机，输入密码后再进入百度网盘，有点麻烦。前段时间学了
-docker 以后，成功把 sagemath 塞进去了(但是没写成
-Dockerfile)。现在突发奇想把百度网盘塞进去看看怎么样。事实证明还不错。</p>
-<p><em><del>P.S:deepseek是这样润色的</del></em></p>
-<blockquote>
-<p><em><del>以前安装百度网盘客户端后，总会在系统注册表中肆意创建冗余项，右键菜单、资源管理器乃至各种隐蔽角落都充斥着它的痕迹。最令人困扰的是这些残留项如同数字杂草，即便手动清理后仍会不断重生，加上其频繁出现的运行错误和令人费解的UI设计，最终让我这个有轻度数字洁癖的用户决定采取隔离措施。</del></em></p>
-<p><em><del>最初尝试将其封印在Hyper-V虚拟机中，虽然获得了清爽的系统环境，但繁琐的启动流程令人却步：每次都要先启用Hyper-V服务，再启动虚拟机，经过密码验证后才能使用。直到最近接触Docker技术，成功将sagemath容器化后（尽管尚未规范化为Dockerfile），突然灵光一现——何不把百度网盘也装进容器？</del></em></p>
-<p><em><del>实践证明确实可行，现在通过精心配置的容器环境，既保持了宿主系统的纯净，又避免了虚拟机方案的笨重流程，这种平衡数字卫生与实用性的体验着实令人欣喜。</del></em></p>
-</blockquote>
-<hr />
-<h4 id="部署">部署</h4>
-<ol type="1">
-<li>物理机安装 X Server 用于接收数据显示图形化窗口，我下载安装的是 <a
-target="_blank" rel="noopener" href="https://sourceforge.net/projects/vcxsrv/">VcXsrv Windows X
-Server</a>，启动 <code>XLaunch</code></li>
-<li>下载 <a
-target="_blank" rel="noopener" href="https://pan.baidu.com/download">baidunetdisk_4.17.7_amd64.deb</a></li>
-<li>Dockerfile 如下</li>
-</ol>
-<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> ubuntu:<span class="number">20.04</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ENV</span> DEBIAN_FRONTEND=noninteractive \</span><br><span class="line">    TZ=Asia/Shanghai</span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> <span class="built_in">ln</span> -snf /usr/share/zoneinfo/<span class="variable">$TZ</span> /etc/localtime &amp;&amp; <span class="built_in">echo</span> <span class="variable">$TZ</span> &gt; /etc/timezone</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> apt-get update &amp;&amp; apt-get install -y \</span></span><br><span class="line"><span class="language-bash">    fonts-noto-cjk \</span></span><br><span class="line"><span class="language-bash">    libgtk2.0-0 \</span></span><br><span class="line"><span class="language-bash">    libnotify4 \</span></span><br><span class="line"><span class="language-bash">    libnss3 \</span></span><br><span class="line"><span class="language-bash">    libxss1 \</span></span><br><span class="line"><span class="language-bash">    xdg-utils \</span></span><br><span class="line"><span class="language-bash">    gdebi-core \</span></span><br><span class="line"><span class="language-bash">    xauth \</span></span><br><span class="line"><span class="language-bash">    &amp;&amp; <span class="built_in">rm</span> -rf /var/lib/apt/lists/*</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">COPY</span><span class="language-bash"> baidunetdisk_4.17.7_amd64.deb /tmp/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> gdebi --non-interactive /tmp/baidunetdisk_4.17.7_amd64.deb &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    <span class="built_in">rm</span> /tmp/baidunetdisk_4.17.7_amd64.deb</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> useradd --create-home --shell /bin/bash baidunetdisk &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    <span class="built_in">chown</span> -R baidunetdisk:baidunetdisk /opt/baidunetdisk</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ENV</span> DISPLAY=host.docker.internal:<span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">USER</span> baidunetdisk</span><br><span class="line"></span><br><span class="line"><span class="keyword">CMD</span><span class="language-bash"> [<span class="string">&quot;/opt/baidunetdisk/baidunetdisk&quot;</span>]</span></span><br></pre></td></tr></table></figure>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build <span class="literal">-t</span> baidunetdisk:<span class="number">4.17</span>.<span class="number">7</span> .</span><br></pre></td></tr></table></figure>
-<ol start="4" type="1">
-<li>run，并将物理机的一个目录映射挂载到容器内，</li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run <span class="literal">-it</span> <span class="literal">-v</span> d:/share:/mnt/share <span class="literal">-e</span> DISPLAY=host.docker.internal:<span class="number">0</span> baidunetdisk:<span class="number">4.17</span>.<span class="number">7</span></span><br></pre></td></tr></table></figure>
-<ol start="5" type="1">
-<li>之后可以使用 <code>docker start xx</code> 和
-<code>docker stop xx</code> 来启动或关闭百度网盘了</li>
-</ol>
-<h4 id="测试">测试</h4>
-<p>测试千兆网+SVIP下的上传下载速率（测试不具科学性，仅供参考）</p>
-<table>
-<thead>
-<tr class="header">
-<th></th>
-<th>Hyper-V</th>
-<th>Docker</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>上传单个大文件</td>
-<td>6.65MB/s</td>
-<td>4.06MB/s</td>
-</tr>
-<tr class="even">
-<td>下载单个冷门大文件</td>
-<td>30MB/s~38MB/s</td>
-<td>20MB/s~25MB/s</td>
-</tr>
-<tr class="odd">
-<td>下载单个热门大文件</td>
-<td>85MB/s~90MB/s</td>
-<td>20MB/s~25MB/s</td>
-</tr>
-</tbody>
-</table>
-<p>看起来似乎我的docker网络配置有问题（？）</p>
-<h4 id="优劣比较">优劣比较</h4>
-<p>相比于正常情况下的百度网盘，把它塞进docker里有一些不同的使用体验</p>
-<p>优点：</p>
-<ul>
-<li>有效避免了百度网盘到处扔垃圾</li>
-<li>有一些弹窗弹不出来啦</li>
-<li>个人感觉 linux 的 UI 更好看一点</li>
-<li><em><del>把流氓软件囚禁起来感觉很爽</del></em></li>
-</ul>
-<p>缺点：</p>
-<ul>
-<li>网速有所下滑，不过如果没有SVIP的话想必不会有什么感受吧（笑）</li>
-<li>不能通过浏览器调用启动百度网盘，也不能用剪贴板下载，必须先转存再下载</li>
-<li>买不了会员，因为弹不出浏览器（这算是缺点吗？）</li>
-</ul>
-<h4 id="总结">总结</h4>
-<p>感觉还是挺不错的，临时用用体验很好，不过传输大文件的时候大概还得启动虚拟机。</p>
-<p>过几天把 sagemath
-整好，我再也不想体验<strong>比赛早上九点结束而凌晨三点的我虽已有exp脚本却还在头疼配置sagemath+flatter环境时的疯狂报错</strong>了</p>
-
-                
-                <p class="end">__END__</p>
-            </div>
-            <div class="article-footer">
-                <div class="suffix-box">
-    <div class="suffix-box-left">
-        <img src="/image/sidebar/avatar.jpg" alt="MetaMiku">
-    </div>
-    <div class="suffix-box-right">
-        <span class="suffix-box-title">文章作者：</span>MetaMiku
-        <br>
-        <span class="suffix-box-title">文章出处：</span><a href="/2025/01/30/%E3%80%90%E5%8D%8A%E6%95%B4%E6%B4%BB%E3%80%91%E6%8A%8A%E7%99%BE%E5%BA%A6%E7%BD%91%E7%9B%98%E5%A1%9E%E8%BF%9Bdocker%E9%87%8C/" target="_blank">【半整活】把百度网盘塞进docker里</a>
-        <br>
-        <span class="suffix-box-title">作者签名：</span>铁血的热血的冷血的.
-        <br>
-        <span class="suffix-box-title">关于主题：</span><a href="https://github.com/first19326/Hexo-LiveForCode" target="_blank">Hexo - Live For Code</a>
-        <br>
-        <span class="suffix-box-title">版权声明：</span>文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" title="BY-NC-SA" target="_blank">BY-NC-SA</a> 许可协议，转载请注明出处
-        <br>
-    </div>
-    <div style="clear: both;"></div>
-</div>
-                
-                
-                <div class="article-prev-next">
+        
+            <!-- 归档页面、分类归档页面、标签归档页面 -->
+            <div class="articles">
+                <div class="articles-wrap">
+                    <span class="archive-move-on"></span>
+                    <span class="archive-counter">
+                        
+                            目前共计 9 篇日志，继续加油！
+                        
+                    </span>
                     
                     
-                        <a href="/2024/12/16/2024-ccbciscn/" class="next-prefix">» </a> 下一篇：    <a href="/2024/12/16/2024-ccbciscn/" title="发布于 2024-12-16 12:20">2024-ccbciscn</a>
+                        
+                            <div class="archive-title">
+                                <h2 class="archive-year">2025</h2>
+                            </div>
+                            
+                           
+                        <div class="article">
+                            <div class="article-header">
+                                <h1 class="article-title"><a href="/2025/03/18/20250315%E9%95%BF%E5%9F%8E%E6%9D%AF%E5%8D%8A%E5%86%B3%E8%B5%9B/"><span>20250315长城杯半决赛</span></a></h1>
+                                <div class="article-meta">
+                                    <span class="article-time">03-18</span>
+                                </div>
+                            </div>
+                        </div>
                     
                 </div>
             </div>
             
-    <div class="article-comments">
         
-            <div class="comments-title">
-                评论列表
-            </div>
-        
-        <div class="comments-content"></div>
-    </div>
-    
- 
-        </div>
     
 </div>
-
-  
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    tex2jax: {
-      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-      processEscapes: true,
-      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-    }
-  });
-  MathJax.Hub.Queue(function() {
-    var all = MathJax.Hub.getAllJax(), i;
-    for(i=0; i < all.length; i += 1) {
-        all[i].SourceElement().parentNode.className += ' has-jax';
-    }
-  });
-</script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@2.7.8/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-
     <div id="footer">
     <div>【形而上者之谓道，形而下者之谓器】</div><div>&copy; 2020-2024 MetaMiku. All Rights Reserved.</div>
 </div>
