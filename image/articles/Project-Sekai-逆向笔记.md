@@ -37,13 +37,13 @@ pjsk逆向唯一神贴: [Project SEKAI 逆向 - 笔记归档](https://mos9527.co
 
 发现 `AF 1B B1 FA`，但是在第九个字节开始，真的没加密吗？*~~我不信会这么仁慈~~*
 
-![](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411153730114.png)
+![ ](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411153730114.png)
 
 尝试把前八个字节删掉，并找到 `./lib/arm64-v8a/libil2cpp.so`，一并丢给 [Il2CppDumper](https://github.com/Perfare/Il2CppDumper/)
 
 果不其然报错了，而且是运行一半之后才报错，如图
 
-![](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411154451449.png)
+![ ](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411154451449.png)
 
 查看 `hexdump` 发现整个文件到处都是乱码，应该还是有加密
 
@@ -53,11 +53,11 @@ pjsk逆向唯一神贴: [Project SEKAI 逆向 - 笔记归档](https://mos9527.co
 
 启动游戏，进 `adb shell` 用 `top` 命令拿 `PID=31607`
 
-![](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411155027155.png)
+![ ](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411155027155.png)
 
 `su` 后在 `/proc/[PID]/maps` 查找 `metadata`，结果如图
 
-![](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411155233392.png)
+![ ](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411155233392.png)
 
 使用 `dd` 来 `dump` 这三段内存
 
@@ -69,7 +69,7 @@ dd if=/proc/31607/mem of=/sdcard/libcamera_metadata.so.3 bs=1 skip=$(printf "%u"
 
 第一个是 `ELF`，第二个第三个不知道是什么东西
 
-![](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411165850349.png)
+![ ](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411165850349.png)
 
 #### 内存搜索 `AF 1B B1 FA` (失败)
 
@@ -77,13 +77,13 @@ dd if=/proc/31607/mem of=/sdcard/libcamera_metadata.so.3 bs=1 skip=$(printf "%u"
 
 注意：使用 GameGuardian 有封号风险，谨慎使用
 
-![](/image/articles/Project-Sekai-逆向笔记.assets/被朝夕ban了.jpg)
+![ ](/image/articles/Project-Sekai-逆向笔记.assets/被朝夕ban了.jpg)
 
 痛失小号×1
 
 ~~*其实还可能是因为出于恶搞，用 GG 在游戏里面改了 2147483647 个水晶（当然只是前端）*~~
 
-![](/image/articles/Project-Sekai-逆向笔记.assets/2147483647.jpg)
+![ ](/image/articles/Project-Sekai-逆向笔记.assets/2147483647.jpg)
 
 当时 root 机截图坏了，临时拍了个屏
 
@@ -93,11 +93,11 @@ dd if=/proc/31607/mem of=/sdcard/libcamera_metadata.so.3 bs=1 skip=$(printf "%u"
 
 还是在 [metadata 动态提取](https://mos9527.com/posts/pjsk/archive-20240105/#1-metadata-%E5%8A%A8%E6%80%81%E6%8F%90%E5%8F%96) 中，发现其他服中的 metadata 有这样的字符串
 
-![](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411171057733.png)
+![ ](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411171057733.png)
 
 GG 搜了一下 `mscorlib`，有好多结果，又搜了一下 `mscorlib.dll.<Module>`(注意用十六进制搜，里面有的点并不是字符点)，我草，唯一结果
 
-![](/image/articles/Project-Sekai-逆向笔记.assets/GG_1.png)
+![ ](/image/articles/Project-Sekai-逆向笔记.assets/GG_1.png)
 
 所在内存地址 `0x7B26457032` ，顺便看一下内存上下文，确实有像 metadata 的字符串
 
@@ -132,11 +132,11 @@ cat /proc/4958/maps | more
 dd if=/proc/4958/mem of=/sdcard/dump.dat bs=1 skip=$(printf "%u" 0x7b263a0000) count=$((0x7b2761f000-0x7b263a0000))
 ```
 
-![](/imag/articles/Project-Sekai-逆向笔记.assets/image-20250411192917347.png)
+![ ](/imag/articles/Project-Sekai-逆向笔记.assets/image-20250411192917347.png)
 
 一个很像 `global-metadata.dat` 的文件，在 `WinMerge` 中严谨对比一下
 
-![](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411193300514.png)
+![ ](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411193300514.png)
 
 经过比对，相较于 apk 中解包出的 `metadata`，dump 出的 `metadata` 具有以下五点不同
 
@@ -157,11 +157,11 @@ dd if=/proc/4958/mem of=/sdcard/dump.dat bs=1 skip=$(printf "%u" 0x7b263a0000) c
 
 最后使用工具 [Il2CppDumper](https://github.com/Perfare/Il2CppDumper/) 解析 `libil2cpp.so`
 
-![](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411223143942.png)
+![ ](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411223143942.png)
 
 使用 `dnSpy` 反编译 `./DummyDll/Assembly-CSharp.dll`
 
-![](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411223309868.png)
+![ ](/image/articles/Project-Sekai-逆向笔记.assets/image-20250411223309868.png)
 
 有 [Beebyte](https://www.beebyte.co.uk/) 但是类名函数名没混淆
 
