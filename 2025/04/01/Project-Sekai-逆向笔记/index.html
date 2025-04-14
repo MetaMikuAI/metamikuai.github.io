@@ -83,32 +83,32 @@
 <p>研究版本：Project Sekai 国服 3.4.0</p>
 <h3 id="提取-global-metadata-dat-成功"><a href="#提取-global-metadata-dat-成功" class="headerlink" title="提取 global-metadata.dat (成功)"></a>提取 <code>global-metadata.dat</code> (成功)</h3><h4 id="游戏安装包-失败"><a href="#游戏安装包-失败" class="headerlink" title="游戏安装包(失败)"></a>游戏安装包(失败)</h4><p>拿到公测开始公布的安装包，解压，找到<code>./assets/bin/Data/Managed/Metadata/global-metadata.dat</code></p>
 <p>发现 <code>AF 1B B1 FA</code>，但是在第九个字节开始，真的没加密吗？<em><del>我不信会这么仁慈</del></em></p>
-<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411153730114.png" alt=" "></p>
+<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411153730114.png" alt=""></p>
 <p>尝试把前八个字节删掉，并找到 <code>./lib/arm64-v8a/libil2cpp.so</code>，一并丢给 <a target="_blank" rel="noopener" href="https://github.com/Perfare/Il2CppDumper/">Il2CppDumper</a></p>
 <p>果不其然报错了，而且是运行一半之后才报错，如图</p>
-<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411154451449.png" alt=" "></p>
+<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411154451449.png" alt=""></p>
 <p>查看 <code>hexdump</code> 发现整个文件到处都是乱码，应该还是有加密</p>
-<h4 id="proc-PID-maps-提取-libcamera-metadata-dat"><a href="#proc-PID-maps-提取-libcamera-metadata-dat" class="headerlink" title="/proc/[PID]/maps 提取 libcamera-metadata.dat"></a><code>/proc/[PID]/maps</code> 提取 <code>libcamera-metadata.dat</code></h4><p>参照 <a target="_blank" rel="noopener" href="https://mos9527.com/posts/pjsk/archive-20240105/#1-metadata-%E5%8A%A8%E6%80%81%E6%8F%90%E5%8F%96">metadata 动态提取</a> 中的方法</p>
+<h4 id="proc-PID-maps-提取-libcamera-metadata-dat-失败"><a href="#proc-PID-maps-提取-libcamera-metadata-dat-失败" class="headerlink" title="/proc/[PID]/maps 提取 libcamera-metadata.dat (失败)"></a><code>/proc/[PID]/maps</code> 提取 <code>libcamera-metadata.dat</code> (失败)</h4><p>参照 <a target="_blank" rel="noopener" href="https://mos9527.com/posts/pjsk/archive-20240105/#1-metadata-%E5%8A%A8%E6%80%81%E6%8F%90%E5%8F%96">metadata 动态提取</a> 中的方法</p>
 <p>启动游戏，进 <code>adb shell</code> 用 <code>top</code> 命令拿 <code>PID=31607</code></p>
-<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411155027155.png" alt=" "></p>
+<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411155027155.png" alt=""></p>
 <p><code>su</code> 后在 <code>/proc/[PID]/maps</code> 查找 <code>metadata</code>，结果如图</p>
-<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411155233392.png" alt=" "></p>
+<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411155233392.png" alt=""></p>
 <p>使用 <code>dd</code> 来 <code>dump</code> 这三段内存</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dd if=/proc/31607/mem of=/sdcard/libcamera_metadata.so.1 bs=1 skip=$(printf &quot;%u&quot; 0x715074d000) count=$((0x7150755000-0x715074d000))</span><br><span class="line">dd if=/proc/31607/mem of=/sdcard/libcamera_metadata.so.2 bs=1 skip=$(printf &quot;%u&quot; 0x715076a000) count=$((0x715076b000-0x715076a000))</span><br><span class="line">dd if=/proc/31607/mem of=/sdcard/libcamera_metadata.so.3 bs=1 skip=$(printf &quot;%u&quot; 0x715076b000) count=$((0x715076d000-0x715076b000))</span><br></pre></td></tr></table></figure>
 <p>第一个是 <code>ELF</code>，第二个第三个不知道是什么东西</p>
-<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411165850349.png" alt=" "></p>
+<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411165850349.png" alt=""></p>
 <h4 id="内存搜索-AF-1B-B1-FA-失败"><a href="#内存搜索-AF-1B-B1-FA-失败" class="headerlink" title="内存搜索 AF 1B B1 FA (失败)"></a>内存搜索 <code>AF 1B B1 FA</code> (失败)</h4><p>分别使用 Frida 和 GameGuardian 使用众多方法在内存中搜索魔术头 <code>AF 1B B1 FA</code> 无果。</p>
 <p>注意：使用 GameGuardian 有封号风险，谨慎使用</p>
-<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/被朝夕ban了.jpg" alt=" "></p>
+<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/被朝夕ban了.jpg" alt=""></p>
 <p>痛失小号×1</p>
 <p><del><em>其实还可能是因为出于恶搞，用 GG 在游戏里面改了 2147483647 个水晶（当然只是前端）</em></del></p>
-<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/2147483647.jpg" alt=" "></p>
+<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/2147483647.jpg" alt=""></p>
 <p>当时 root 机截图坏了，临时拍了个屏</p>
 <h4 id="内存搜索特殊字段-成功"><a href="#内存搜索特殊字段-成功" class="headerlink" title="内存搜索特殊字段(成功)"></a>内存搜索特殊字段(成功)</h4><p>虽然被 ban 了，但是毕竟游戏的 metadata 已经被加载了，尝试继续在游戏开始界面</p>
 <p>还是在 <a target="_blank" rel="noopener" href="https://mos9527.com/posts/pjsk/archive-20240105/#1-metadata-%E5%8A%A8%E6%80%81%E6%8F%90%E5%8F%96">metadata 动态提取</a> 中，发现其他服中的 metadata 有这样的字符串</p>
-<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411171057733.png" alt=" "></p>
+<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411171057733.png" alt=""></p>
 <p>GG 搜了一下 <code>mscorlib</code>，有好多结果，又搜了一下 <code>mscorlib.dll.&lt;Module&gt;</code>(注意用十六进制搜，里面有的点并不是字符点)，我草，唯一结果</p>
-<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/GG_1.png" alt=" "></p>
+<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/GG_1.png" alt=""></p>
 <p>所在内存地址 <code>0x7B26457032</code> ，顺便看一下内存上下文，确实有像 metadata 的字符串</p>
 <p>到 <code>/proc/[PID]/maps</code> 找这段内存</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/4958/maps | more</span><br></pre></td></tr></table></figure>
@@ -117,9 +117,9 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">7b263a0000-7b2761f000 rw-p 00000000 00:00 0</span><br></pre></td></tr></table></figure>
 <p>用 <code>dd</code> dump 出这段内存</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dd if=/proc/4958/mem of=/sdcard/dump.dat bs=1 skip=$(printf &quot;%u&quot; 0x7b263a0000) count=$((0x7b2761f000-0x7b263a0000))</span><br></pre></td></tr></table></figure>
-<p><img src="/imag/articles/Project-Sekai-逆向笔记.assets/image-20250411192917347.png" alt=" "></p>
+<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411192917347.png" alt=""></p>
 <p>一个很像 <code>global-metadata.dat</code> 的文件，在 <code>WinMerge</code> 中严谨对比一下</p>
-<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411193300514.png" alt=" "></p>
+<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411193300514.png" alt=""></p>
 <p>经过比对，相较于 apk 中解包出的 <code>metadata</code>，dump 出的 <code>metadata</code> 具有以下五点不同</p>
 <ol>
 <li>魔数 <code>AF 1B B1 FA</code> 被改为 <code>00 00 00 00</code>，这是先前全局搜索内存无果的原因<em><del>（朝夕你真毒啊）</del></em></li>
@@ -138,9 +138,9 @@
 <li>删除头 <code>8</code> 字节，即使 <code>AF 1B B1 FA</code> 位于文件开头</li>
 </ol>
 <p>最后使用工具 <a target="_blank" rel="noopener" href="https://github.com/Perfare/Il2CppDumper/">Il2CppDumper</a> 解析 <code>libil2cpp.so</code></p>
-<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411223143942.png" alt=" "></p>
+<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411223143942.png" alt=""></p>
 <p>使用 <code>dnSpy</code> 反编译 <code>./DummyDll/Assembly-CSharp.dll</code></p>
-<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411223309868.png" alt=" "></p>
+<p><img src="/image/articles/Project-Sekai-逆向笔记.assets/image-20250411223309868.png" alt=""></p>
 <p>有 <a target="_blank" rel="noopener" href="https://www.beebyte.co.uk/">Beebyte</a> 但是类名函数名没混淆</p>
 <p>任务完成</p>
 <p>恢复好的 <code>global-metadata.dat</code> 的 <code>MD5</code> 为 <code>9069c4db8cd9c520c2d22be69c36d30b</code></p>
@@ -216,7 +216,7 @@
 
 
     <div id="footer">
-    <div>【形而上者之谓道，形而下者之谓器】</div><div>&copy; 2020-2024 MetaMiku. All Rights Reserved.</div>
+    <div>【MetaMiku—neither self nor Miku, but a flicker between realities in the Meta SEKAI of my pulse.】</div><div>&copy; 2020-2025 MetaMiku. All Rights Reserved.</div>
 </div>
     <div id="sidebar">
     <div class="menu-wrap" style="display:none;">
@@ -546,7 +546,7 @@
         ],
 
         FooterStyle : 2,
-        BottomText  : "<div>【形而上者之谓道，形而下者之谓器】</div><div>&copy; 2020-2024 MetaMiku. All Rights Reserved.</div>",
+        BottomText  : "<div>【MetaMiku—neither self nor Miku, but a flicker between realities in the Meta SEKAI of my pulse.】</div><div>&copy; 2020-2025 MetaMiku. All Rights Reserved.</div>",
 
         ConsoleList : [
             
