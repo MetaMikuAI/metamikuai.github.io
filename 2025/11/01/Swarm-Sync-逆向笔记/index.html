@@ -9,7 +9,7 @@
     <meta http-equiv="Cache-Control" content="no-siteapp">
     <title>
         
-            归档
+            Swarm Sync 逆向笔记
         
     </title>
     <link rel="shortcut icon" href="#"/>
@@ -32,15 +32,32 @@
 <meta name="generator" content="Hexo 7.1.1"></head>
 <body>
     <a id="cover"></a>
-    <link type="text/css" rel="stylesheet" href="/css/archive.css">
+    <link type="text/css" rel="stylesheet" href="/css/post.css">
 <div id="header" class="header">
     <div class="vertical">
         <div class="inner">
             
-                <h1 class="header-subtitle">归档</h1>
+                <h1 class="header-subtitle">Swarm Sync 逆向笔记</h1>
                 <div class="header-subinfo">
-                    <p class="article-info-text Chinese"></p>
-                    <p class="article-info-text English"></p>                  
+                    <p class="article-info-text">
+                        <span>
+                            <i class="iconfont icon-time"></i> 发表时间：2025-11-01
+                        </span>
+                        
+                            
+                                <span id="/2025/11/01/Swarm-Sync-逆向笔记/" class="leancloud_visitors" data-flag-title="Swarm Sync 逆向笔记">
+                                    <i class="iconfont icon-browse"></i> 阅读：<sapn class="leancloud-visitors-count"></span>
+                                </span>
+                            
+                            
+                                <span>
+                                    <i class="iconfont icon-interactive"></i> 评论：<span class="valine-comment-count" data-xid="/2025/11/01/Swarm-Sync-逆向笔记/"></span>
+                                </span>
+                              
+                        
+                    </p>
+                    
+                    
                 </div>
             
         </div>
@@ -49,69 +66,100 @@
 </div>
 <div id="container">
     
-        
-            <!-- 归档页面、分类归档页面、标签归档页面 -->
-            <div class="articles">
-                <div class="articles-wrap">
-                    <span class="archive-move-on"></span>
-                    <span class="archive-counter">
-                        
-                            目前共计 11 篇日志，继续加油！
-                        
-                    </span>
+        <!-- 文章页面 -->
+        <div id="article">
+            <div class="toc"></div>
+            <div class="article-body">
+                <h3 id="资源解包"><a href="#资源解包" class="headerlink" title="资源解包"></a>资源解包</h3><p>直接使用 MT 解包就能看到几乎所有资源文件，没有任何难度</p>
+<h3 id="代码逆向"><a href="#代码逆向" class="headerlink" title="代码逆向"></a>代码逆向</h3><p>使用 Jadx 反编译后发现，只有少得可怜的几行代码</p>
+<p><img src="/image/articles/Swarm-Sync-逆向笔记.assets/image-20251101150936733.png" alt="image-20251101150936733"></p>
+<p>经过研究，Vedal 用的应该是 React Native 开发的 app，其主要代码逻辑是被编译于 <code>./assets/index.android.bundle</code> 文件的 JavaScript</p>
+<p>以前没接触过这方面的技术栈，走一步看一步</p>
+<p>打开该文件，版本号是 0x60 即 96，是较新的版本，原始 js 应该已经被编译和一些混淆处理了</p>
+<p><img src="/image/articles/Swarm-Sync-逆向笔记.assets/image-20251101151332342.png" alt="image-20251101151332342"></p>
+<p>可以使用 <a target="_blank" rel="noopener" href="https://github.com/bongtrop/hbctool">bongtrop/hbctool</a> 工具对 <code>index.android.bundle</code> 进行解析，但是该工具已经不支持 96 版本，找到了支持 96 版本的工具 <a target="_blank" rel="noopener" href="https://github.com/izadgot/hbctool">izadgot/hbctool</a> 可以解析出字节码，另外一个工具 <a target="_blank" rel="noopener" href="https://github.com/P1sec/hermes-dec">P1sec/hermes-dec</a> 可以一定程度上反编译为 js</p>
+<p>看一下反编译后的 JavaScript</p>
+<p><img src="/image/articles/Swarm-Sync-逆向笔记.assets/image-20251101152016592.png" alt="image-20251101152016592"></p>
+<p>呃呃，虽然可读性依然几乎不可读，但是至少聊胜于无吧（？</p>
+<p>这条路估计走不通了，但是可以为后面动态调试做点准备</p>
+<h3 id="动调抓包"><a href="#动调抓包" class="headerlink" title="动调抓包"></a>动调抓包</h3><p>龟龟没做 x86 适配，可恶，模拟器用不了了（除非 ARM Windows + ARM MuMu）</p>
+<p>HttpCanary 无效，抓不到</p>
+<p>手边的真机没太搞明白 root，使用 <code>MitmProxy</code>抓包只能抓到一部分的 https，Swarm Sync 恰好抓不到：</p>
+<p><img src="/image/articles/Swarm-Sync-逆向笔记.assets/image-20251101152720885.png" alt="image-20251101152720885"></p>
+<p>不过至少知道了可能是国内的 IoT 平台——<a target="_blank" rel="noopener" href="https://www.tuya.com/cn/">涂鸦智能</a></p>
+<p>好在最后找到了 r0ysue 师傅超强的通杀脚本 <a target="_blank" rel="noopener" href="https://github.com/r0ysue/r0capture">r0ysue/r0capture</a>，需要配置低版本 frida 的环境，如 <code>15.2.2</code>，然后执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python .\r0capture.py -U <span class="string">&quot;Swarm Sync&quot;</span> -p test.pcap</span><br></pre></td></tr></table></figure>
+<p>抓包示例：</p>
+<p><img src="/image/articles/Swarm-Sync-逆向笔记.assets/image-20251101162934376.png" alt="image-20251101162934376"></p>
+<p>非常难懂，感觉还是会有很大难度</p>
+<p>具体明天到货再研究研究</p>
+<p><em><del>不过明天好像有 N1CTF 来着（？</del></em></p>
+
+                
+                <p class="end">__END__</p>
+            </div>
+            <div class="article-footer">
+                <div class="suffix-box">
+    <div class="suffix-box-left">
+        <img src="/image/sidebar/avatar.jpg" alt="MetaMiku">
+    </div>
+    <div class="suffix-box-right">
+        <span class="suffix-box-title">文章作者：</span>MetaMiku
+        <br>
+        <span class="suffix-box-title">文章出处：</span><a href="/2025/11/01/Swarm-Sync-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0/" target="_blank">Swarm Sync 逆向笔记</a>
+        <br>
+        <span class="suffix-box-title">作者签名：</span>铁血的热血的冷血的.
+        <br>
+        <span class="suffix-box-title">关于主题：</span><a href="https://github.com/first19326/Hexo-LiveForCode" target="_blank">Hexo - Live For Code</a>
+        <br>
+        <span class="suffix-box-title">版权声明：</span>文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" title="BY-NC-SA" target="_blank">BY-NC-SA</a> 许可协议，转载请注明出处
+        <br>
+    </div>
+    <div style="clear: both;"></div>
+</div>
+                
+                
+                <div class="article-prev-next">
                     
                     
-                        
-                            <div class="archive-title">
-                                <h2 class="archive-year">2025</h2>
-                            </div>
-                            
-                           
-                        <div class="article">
-                            <div class="article-header">
-                                <h1 class="article-title"><a href="/2025/11/01/Swarm-Sync-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0/"><span>Swarm Sync 逆向笔记</span></a></h1>
-                                <div class="article-meta">
-                                    <span class="article-time">11-01</span>
-                                </div>
-                            </div>
-                        </div>
-                    
-                           
-                        <div class="article">
-                            <div class="article-header">
-                                <h1 class="article-title"><a href="/2025/04/01/Project-Sekai-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0/"><span>Project Sekai 逆向笔记</span></a></h1>
-                                <div class="article-meta">
-                                    <span class="article-time">04-01</span>
-                                </div>
-                            </div>
-                        </div>
-                    
-                           
-                        <div class="article">
-                            <div class="article-header">
-                                <h1 class="article-title"><a href="/2025/03/18/20250315%E9%95%BF%E5%9F%8E%E6%9D%AF%E5%8D%8A%E5%86%B3%E8%B5%9B/"><span>20250315长城杯半决赛</span></a></h1>
-                                <div class="article-meta">
-                                    <span class="article-time">03-18</span>
-                                </div>
-                            </div>
-                        </div>
-                    
-                           
-                        <div class="article">
-                            <div class="article-header">
-                                <h1 class="article-title"><a href="/2025/02/25/Coppersmith%E5%AD%A6%E4%B9%A0/"><span>Coppersmith学习</span></a></h1>
-                                <div class="article-meta">
-                                    <span class="article-time">02-25</span>
-                                </div>
-                            </div>
-                        </div>
+                        <a href="/2025/04/01/Project-Sekai-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0/" class="next-prefix">» </a> 下一篇：    <a href="/2025/04/01/Project-Sekai-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0/" title="发布于 2025-04-01 10:04">Project Sekai 逆向笔记</a>
                     
                 </div>
             </div>
             
+    <div class="article-comments">
         
+            <div class="comments-title">
+                评论列表
+            </div>
+        
+        <div class="comments-content"></div>
+    </div>
+    
+ 
+        </div>
     
 </div>
+
+  
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@2.7.8/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
     <div id="footer">
     <div>【MetaMiku—neither self nor Miku, but a flicker between realities in the Meta SEKAI of my pulse.】</div><div>&copy; 2020-2025 MetaMiku. All Rights Reserved.</div>
 </div>
