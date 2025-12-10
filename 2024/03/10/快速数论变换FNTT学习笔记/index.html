@@ -70,33 +70,81 @@
         <div id="article">
             <div class="toc"></div>
             <div class="article-body">
-                <h1 id="快速数论变换-fast-number-theoretic-transform-FNTT"><a href="#快速数论变换-fast-number-theoretic-transform-FNTT" class="headerlink" title="快速数论变换(fast number-theoretic transform,FNTT)"></a>快速数论变换(fast number-theoretic transform,FNTT)</h1><p>‎2024‎年‎1‎月‎15‎日 12:55:59 记</p>
-<h3 id="大数乘法与多项式乘法-Polynomial-Multiplication"><a href="#大数乘法与多项式乘法-Polynomial-Multiplication" class="headerlink" title="大数乘法与多项式乘法(Polynomial Multiplication)"></a>大数乘法与多项式乘法(Polynomial Multiplication)</h3><p>两个大数如$12345$和$67890$，用多项式表达：</p>
-<script type="math/tex; mode=display">
+                <h1
+id="快速数论变换fast-number-theoretic-transformfntt">快速数论变换(fast
+number-theoretic transform,FNTT)</h1>
+<p>‎2024‎年‎1‎月‎15‎日 12:55:59 记</p>
+<h3
+id="大数乘法与多项式乘法polynomial-multiplication">大数乘法与多项式乘法(Polynomial
+Multiplication)</h3>
+<p>两个大数如<span class="math inline">\(12345\)</span>和<span
+class="math inline">\(67890\)</span>，用多项式表达：</p>
+<p><span class="math display">\[
 f(x) = 5 x^0 +4 x^1 +3 x^2 +2 x^3 +1 x^4\\
-g(x) = 0 x^0 +9 x^1 +8 x^2 +7 x^3 +6 x^4</script><p>在进行多项式乘法的时候，得到$h(x)$的系数便可以变相表示为两个大整数之积</p>
-<script type="math/tex; mode=display">
+g(x) = 0 x^0 +9 x^1 +8 x^2 +7 x^3 +6 x^4
+\]</span></p>
+<p>在进行多项式乘法的时候，得到<span
+class="math inline">\(h(x)\)</span>的系数便可以变相表示为两个大整数之积</p>
+<p><span class="math display">\[
 h(x) = f(x) \cdot g(x)\\
-h(x) = (5 x^0 +4 x^1 +3 x^2 +2 x^3 +1 x^4)(0 x^0 +9 x^1 +8 x^2 +7 x^3 +6 x^4)\\
-h(x) = 0 x^0 + 45 x^1 + 76 x^2 + 94 x^3 + 100 x^4 + 70 x^5 +40 x^6 + 19 x^7 + 6 x^8</script><p>转为列表</p>
-<script type="math/tex; mode=display">
-[0,45,76,94,100,70,40,19,6]</script><p>逆序一下，符合高位在左的书写习惯</p>
-<script type="math/tex; mode=display">
-[6,19,40,70,100,94,76,45,0]</script><p>进位</p>
-<script type="math/tex; mode=display">
-[8,3,8,1,0,2,0,5,0]</script><h3 id="快速傅里叶变换-Fast-Fourier-Transform-FFT"><a href="#快速傅里叶变换-Fast-Fourier-Transform-FFT" class="headerlink" title="快速傅里叶变换(Fast Fourier Transform,FFT)"></a>快速傅里叶变换(Fast Fourier Transform,FFT)</h3><p>回到开始的多项式，估算原积不超过$10$位，不足$2^k$位数则用$0$补齐（方便后续递归分治）</p>
-<script type="math/tex; mode=display">
-f(x) = 5 x^0 +4 x^1 +3 x^2 +2 x^3 +1 x^4 +0 x^5 + 0 x^6 +\cdots 0 x^{14} +0 x^{15}   \\
-g(x) = 0 x^0 +9 x^1 +8 x^2 +7 x^3 +6 x^4 +0 x^5 + 0 x^6 +\cdots 0 x^{14} +0 x^{15}</script><p>正常的乘法，需要对$f(x)$和$g(x)$的每一项都两两相乘，复杂度$O(n^2)$很高</p>
-<p>为了描述这些多项式方程，除了采用系数表示法($n$个系数)，还可以使用描点表示法($n$个点)，例如方程$y=1x+0$可以用点$(0,0),(1,1)$唯一确定，方程$y=1x^2+2x+3$可以用点$(0,3),(1,6),(2,11)$唯一确定，即<strong>具有$n$个系数的$(n-1)$次多项式方程可以由$n$个不同的点唯一确定</strong></p>
-<p>那么对于$7$次多项式方程</p>
-<script type="math/tex; mode=display">
-f(x) = a_0x^0 + a_1x^1 + a_2x^2 + a_3x^3 + a_4x^4 + a_5x^5 + a_6x^6 + a_7x^7</script><p>任取$7$个</p>
-<script type="math/tex; mode=display">
-x \in (x_0,x_1,x_2,x_3,x_4,x_5,x_6,x_7)</script><p>得到$7$个函数值</p>
-<script type="math/tex; mode=display">
-f(x_0),f(x_1),f(x_2),f(x_3),f(x_4),f(x_5),f(x_6),f(x_7)</script><p>为了求这$7$个函数值，可以用矩阵方法表示(用列向量主要是因为横向量太长了Typora写不下)</p>
-<script type="math/tex; mode=display">
+h(x) = (5 x^0 +4 x^1 +3 x^2 +2 x^3 +1 x^4)(0 x^0 +9 x^1 +8 x^2 +7 x^3 +6
+x^4)\\
+h(x) = 0 x^0 + 45 x^1 + 76 x^2 + 94 x^3 + 100 x^4 + 70 x^5 +40 x^6 + 19
+x^7 + 6 x^8
+\]</span></p>
+<p>转为列表</p>
+<p><span class="math display">\[
+[0,45,76,94,100,70,40,19,6]
+\]</span></p>
+<p>逆序一下，符合高位在左的书写习惯</p>
+<p><span class="math display">\[
+[6,19,40,70,100,94,76,45,0]
+\]</span></p>
+<p>进位</p>
+<p><span class="math display">\[
+[8,3,8,1,0,2,0,5,0]
+\]</span></p>
+<h3 id="快速傅里叶变换fast-fourier-transformfft">快速傅里叶变换(Fast
+Fourier Transform,FFT)</h3>
+<p>回到开始的多项式，估算原积不超过<span
+class="math inline">\(10\)</span>位，不足<span
+class="math inline">\(2^k\)</span>位数则用<span
+class="math inline">\(0\)</span>补齐（方便后续递归分治）</p>
+<p><span class="math display">\[
+f(x) = 5 x^0 +4 x^1 +3 x^2 +2 x^3 +1 x^4 +0 x^5 + 0 x^6 +\cdots 0 x^{14}
++0 x^{15}   \\
+g(x) = 0 x^0 +9 x^1 +8 x^2 +7 x^3 +6 x^4 +0 x^5 + 0 x^6 +\cdots 0 x^{14}
++0 x^{15}
+\]</span></p>
+<p>正常的乘法，需要对<span class="math inline">\(f(x)\)</span>和<span
+class="math inline">\(g(x)\)</span>的每一项都两两相乘，复杂度<span
+class="math inline">\(O(n^2)\)</span>很高</p>
+<p>为了描述这些多项式方程，除了采用系数表示法(<span
+class="math inline">\(n\)</span>个系数)，还可以使用描点表示法(<span
+class="math inline">\(n\)</span>个点)，例如方程<span
+class="math inline">\(y=1x+0\)</span>可以用点<span
+class="math inline">\((0,0),(1,1)\)</span>唯一确定，方程<span
+class="math inline">\(y=1x^2+2x+3\)</span>可以用点<span
+class="math inline">\((0,3),(1,6),(2,11)\)</span>唯一确定，即<strong>具有<span
+class="math inline">\(n\)</span>个系数的<span
+class="math inline">\((n-1)\)</span>次多项式方程可以由<span
+class="math inline">\(n\)</span>个不同的点唯一确定</strong></p>
+<p>那么对于<span class="math inline">\(7\)</span>次多项式方程</p>
+<p><span class="math display">\[
+f(x) = a_0x^0 + a_1x^1 + a_2x^2 + a_3x^3 + a_4x^4 + a_5x^5 + a_6x^6 +
+a_7x^7
+\]</span></p>
+<p>任取<span class="math inline">\(7\)</span>个</p>
+<p><span class="math display">\[
+x \in (x_0,x_1,x_2,x_3,x_4,x_5,x_6,x_7)
+\]</span></p>
+<p>得到<span class="math inline">\(7\)</span>个函数值</p>
+<p><span class="math display">\[
+f(x_0),f(x_1),f(x_2),f(x_3),f(x_4),f(x_5),f(x_6),f(x_7)
+\]</span></p>
+<p>为了求这<span
+class="math inline">\(7\)</span>个函数值，可以用矩阵方法表示(用列向量主要是因为横向量太长了Typora写不下)</p>
+<p><span class="math display">\[
 \begin{bmatrix}
 f(x_0) \\
 f(x_1) \\
@@ -107,14 +155,22 @@ f(x_5) \\
 f(x_6) \\
 f(x_7)
 \end{bmatrix}=\begin{bmatrix}
-x_0^0& x_0^1& x_0^2& x_0^3& x_0^4& x_0^5& x_0^6& x_0^7\\
-x_1^0& x_1^1& x_1^2& x_1^3& x_1^4& x_1^5& x_1^6& x_1^7\\
-x_2^0& x_2^1& x_2^2& x_2^3& x_2^4& x_2^5& x_2^6& x_2^7\\
-x_3^0& x_3^1& x_3^2& x_3^3& x_3^4& x_3^5& x_3^6& x_3^7\\
-x_4^0& x_4^1& x_4^2& x_4^3& x_4^4& x_4^5& x_4^6& x_4^7\\
-x_5^0& x_5^1& x_5^2& x_5^3& x_5^4& x_5^5& x_5^6& x_5^7\\
-x_6^0& x_6^1& x_6^2& x_6^3& x_6^4& x_6^5& x_6^6& x_6^7\\
-x_7^0& x_7^1& x_7^2& x_7^3& x_7^4& x_7^5& x_7^6& x_7^7
+x_0^0&amp; x_0^1&amp; x_0^2&amp; x_0^3&amp; x_0^4&amp; x_0^5&amp;
+x_0^6&amp; x_0^7\\
+x_1^0&amp; x_1^1&amp; x_1^2&amp; x_1^3&amp; x_1^4&amp; x_1^5&amp;
+x_1^6&amp; x_1^7\\
+x_2^0&amp; x_2^1&amp; x_2^2&amp; x_2^3&amp; x_2^4&amp; x_2^5&amp;
+x_2^6&amp; x_2^7\\
+x_3^0&amp; x_3^1&amp; x_3^2&amp; x_3^3&amp; x_3^4&amp; x_3^5&amp;
+x_3^6&amp; x_3^7\\
+x_4^0&amp; x_4^1&amp; x_4^2&amp; x_4^3&amp; x_4^4&amp; x_4^5&amp;
+x_4^6&amp; x_4^7\\
+x_5^0&amp; x_5^1&amp; x_5^2&amp; x_5^3&amp; x_5^4&amp; x_5^5&amp;
+x_5^6&amp; x_5^7\\
+x_6^0&amp; x_6^1&amp; x_6^2&amp; x_6^3&amp; x_6^4&amp; x_6^5&amp;
+x_6^6&amp; x_6^7\\
+x_7^0&amp; x_7^1&amp; x_7^2&amp; x_7^3&amp; x_7^4&amp; x_7^5&amp;
+x_7^6&amp; x_7^7
 \end{bmatrix}\begin{bmatrix}
 a_0 \\
 a_1\\
@@ -124,29 +180,48 @@ a_4 \\
 a_5 \\
 a_6 \\
 a_7
-\end{bmatrix}</script><p>如若使用编程实现该功能，复杂度$O(n^2)$依然没有优势</p>
-<p>重新回到$f(x)$，<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/zh-hans/%E5%A5%87%E5%87%BD%E6%95%B8%E8%88%87%E5%81%B6%E5%87%BD%E6%95%B8">wiki上对奇偶函数的代数结构有这样的描述</a>：</p>
+\end{bmatrix}
+\]</span></p>
+<p>如若使用编程实现该功能，复杂度<span
+class="math inline">\(O(n^2)\)</span>依然没有优势</p>
+<p>重新回到<span class="math inline">\(f(x)\)</span>，<a
+target="_blank" rel="noopener" href="https://zh.wikipedia.org/zh-hans/%E5%A5%87%E5%87%BD%E6%95%B8%E8%88%87%E5%81%B6%E5%87%BD%E6%95%B8">wiki上对奇偶函数的代数结构有这样的描述</a>：</p>
 <blockquote>
-<p>偶函数的任何线性组合皆为偶函数，且偶函数会形成一个实数上的向量空间。相似地，奇函数的任何线性组合皆为奇函数，且奇函数亦会形成一个实数上的向量空间，实际上，”所有“实值函数之向量空间为偶函数和奇函数之子空间的直和。换句话说，<strong>每个定义域关于原点对称的函数都可以被唯一地写成一个偶函数和一个奇函数的相加</strong>：</p>
-<script type="math/tex; mode=display">
-f(x) = f_{even}(x) + f_{odd}(x) = \frac{f(x)+f(-x)}{2} + \frac{f(x)-f(-x)}{2}</script></blockquote>
-<p>类似地，将原式$f(x)$奇偶性分解</p>
-<script type="math/tex; mode=display">
-f(x) = a_0x^0 + a_1x^1 + a_2x^2 + a_3x^3 + a_4x^4 + a_5x^5 + a_6x^6 + a_7x^7\\
-f(x) = (a_0x^0+a_2x^2 + a_4x^4 + a_6x^6) + (a_1x^1+a_3x^3 + a_5x^5 + a_7x^7)\\
-f(x) = (a_0x^0+a_2x^2 + a_4x^4 + a_6x^6) + x(a_1x^0+a_3x^2 + a_5x^4 + a_7x^6)\\</script><p>记</p>
-<script type="math/tex; mode=display">
-q_e(x) = a_0 x^0 + a_2 x^1 + a_4 x^2 + a_6 x^3,q_o(x) = a_1 x^0 + a_3x^1 + a_5 x^2 + a_7 x^3</script><p>则有</p>
-<script type="math/tex; mode=display">
+<p>偶函数的任何线性组合皆为偶函数，且偶函数会形成一个实数上的向量空间。相似地，奇函数的任何线性组合皆为奇函数，且奇函数亦会形成一个实数上的向量空间，实际上，”所有“实值函数之向量空间为偶函数和奇函数之子空间的直和。换句话说，<strong>每个定义域关于原点对称的函数都可以被唯一地写成一个偶函数和一个奇函数的相加</strong>：
+<span class="math display">\[
+f(x) = f_{even}(x) + f_{odd}(x) = \frac{f(x)+f(-x)}{2} +
+\frac{f(x)-f(-x)}{2}
+\]</span></p>
+</blockquote>
+<p>类似地，将原式<span class="math inline">\(f(x)\)</span>奇偶性分解
+<span class="math display">\[
+f(x) = a_0x^0 + a_1x^1 + a_2x^2 + a_3x^3 + a_4x^4 + a_5x^5 + a_6x^6 +
+a_7x^7\\
+f(x) = (a_0x^0+a_2x^2 + a_4x^4 + a_6x^6) + (a_1x^1+a_3x^3 + a_5x^5 +
+a_7x^7)\\
+f(x) = (a_0x^0+a_2x^2 + a_4x^4 + a_6x^6) + x(a_1x^0+a_3x^2 + a_5x^4 +
+a_7x^6)\\
+\]</span> 记 <span class="math display">\[
+q_e(x) = a_0 x^0 + a_2 x^1 + a_4 x^2 + a_6 x^3,q_o(x) = a_1 x^0 + a_3x^1
++ a_5 x^2 + a_7 x^3
+\]</span></p>
+<p>则有 <span class="math display">\[
 f(x) = q_e(x^2) + x q_o(x^2)\\
-f(-x) = q_e(x^2) - x q_o(x^2)</script><p>如此一来计算$f(x_i)$的值只需计算$q_e(x_i),q_o(x_i)$的值即可，观察到$q(x)$与$f(x)$形似，也可以使用同样的逻辑进一步拆分<strong>分治</strong>，使用<strong>递归</strong>的逻辑连接起来。</p>
-<p>为了更好的利用奇偶性质，$x_i$的值不任取，如在本例$n=8$中选取</p>
-<script type="math/tex; mode=display">
-x \in \{e^{\frac{2i\pi}{n}k}|k \in \mathbb{Z}_n,n=8\}</script><p>这样一来</p>
-<script type="math/tex; mode=display">
-e^{\frac{2i\pi}{n}k} = - e^{\frac{2i\pi}{n}(k+\frac{n}{2})}</script><p>综上写出伪代码如下:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">fft</span>(<span class="params">a</span>):</span><br><span class="line">	<span class="comment">#a = [a_0,a_1,a_2,...,a_&#123;n-1&#125;]</span></span><br><span class="line">	<span class="comment">#return [f(w^0),f(w^1),f(w^2),...,f(w^&#123;n-1&#125;)]</span></span><br><span class="line">	<span class="keyword">if</span> (n==<span class="number">1</span>) <span class="keyword">return</span> [a_0]</span><br><span class="line">	pe = [a_0,a_2,...,a_&#123;n-<span class="number">2</span>&#125;]</span><br><span class="line">	po = [a_1,a_3,...,a_&#123;n-<span class="number">1</span>&#125;]</span><br><span class="line">	q_o = fft(p_e)</span><br><span class="line">    q_e = fft(p_e)</span><br><span class="line">    w = cos(2pi/n) + i sin(2pi/n)</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> [<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,...,n/<span class="number">2</span>-<span class="number">1</span>]:</span><br><span class="line">    	f(w^j) = q_e[j] + w^j q_o[j]</span><br><span class="line">    	f(w^&#123;j+n/<span class="number">2</span>&#125;) = q_e[j] - w^j q_o[j]</span><br><span class="line">    <span class="keyword">return</span> [f(w^<span class="number">0</span>),f(w^<span class="number">1</span>),f(w^<span class="number">2</span>),...,f(w^&#123;n-<span class="number">1</span>&#125;)]</span><br></pre></td></tr></table></figure></p>
-<p>以上，实现了从系数表示到点列表示的过程，即主要是为了实现这个计算</p>
-<script type="math/tex; mode=display">
+f(-x) = q_e(x^2) - x q_o(x^2)
+\]</span> 如此一来计算<span
+class="math inline">\(f(x_i)\)</span>的值只需计算<span
+class="math inline">\(q_e(x_i),q_o(x_i)\)</span>的值即可，观察到<span
+class="math inline">\(q(x)\)</span>与<span
+class="math inline">\(f(x)\)</span>形似，也可以使用同样的逻辑进一步拆分<strong>分治</strong>，使用<strong>递归</strong>的逻辑连接起来。</p>
+<p>为了更好的利用奇偶性质，<span
+class="math inline">\(x_i\)</span>的值不任取，如在本例<span
+class="math inline">\(n=8\)</span>中选取 <span class="math display">\[
+x \in \{e^{\frac{2i\pi}{n}k}|k \in \mathbb{Z}_n,n=8\}
+\]</span> 这样一来 <span class="math display">\[
+e^{\frac{2i\pi}{n}k} = - e^{\frac{2i\pi}{n}(k+\frac{n}{2})}
+\]</span> 综上写出伪代码如下: <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">fft</span>(<span class="params">a</span>):</span><br><span class="line">	<span class="comment">#a = [a_0,a_1,a_2,...,a_&#123;n-1&#125;]</span></span><br><span class="line">	<span class="comment">#return [f(w^0),f(w^1),f(w^2),...,f(w^&#123;n-1&#125;)]</span></span><br><span class="line">	<span class="keyword">if</span> (n==<span class="number">1</span>) <span class="keyword">return</span> [a_0]</span><br><span class="line">	pe = [a_0,a_2,...,a_&#123;n-<span class="number">2</span>&#125;]</span><br><span class="line">	po = [a_1,a_3,...,a_&#123;n-<span class="number">1</span>&#125;]</span><br><span class="line">	q_o = fft(p_e)</span><br><span class="line">    q_e = fft(p_e)</span><br><span class="line">    w = cos(2pi/n) + i sin(2pi/n)</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> [<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,...,n/<span class="number">2</span>-<span class="number">1</span>]:</span><br><span class="line">    	f(w^j) = q_e[j] + w^j q_o[j]</span><br><span class="line">    	f(w^&#123;j+n/<span class="number">2</span>&#125;) = q_e[j] - w^j q_o[j]</span><br><span class="line">    <span class="keyword">return</span> [f(w^<span class="number">0</span>),f(w^<span class="number">1</span>),f(w^<span class="number">2</span>),...,f(w^&#123;n-<span class="number">1</span>&#125;)]</span><br></pre></td></tr></table></figure></p>
+<p>以上，实现了从系数表示到点列表示的过程，即主要是为了实现这个计算
+<span class="math display">\[
 \begin{bmatrix}
 f(\omega^0) \\
 f(\omega^1) \\
@@ -157,14 +232,30 @@ f(\omega^5) \\
 f(\omega^6) \\
 f(\omega^7)
 \end{bmatrix}=\begin{bmatrix}
-\omega^{0 \cdot 0}& \omega^{0 \cdot 1}& \omega^{0 \cdot 2}& \omega^{0 \cdot 3}& \omega^{0 \cdot 4}& \omega^{0 \cdot 5}& \omega^{0 \cdot 6}& \omega^{0 \cdot 7}\\
-\omega^{1 \cdot 0}& \omega^{1 \cdot 1}& \omega^{1 \cdot 2}& \omega^{1 \cdot 3}& \omega^{1 \cdot 4}& \omega^{1 \cdot 5}& \omega^{1 \cdot 6}& \omega^{1 \cdot 7}\\
-\omega^{2 \cdot 0}& \omega^{2 \cdot 1}& \omega^{2 \cdot 2}& \omega^{2 \cdot 3}& \omega^{2 \cdot 4}& \omega^{2 \cdot 5}& \omega^{2 \cdot 6}& \omega^{2 \cdot 7}\\
-\omega^{3 \cdot 0}& \omega^{3 \cdot 1}& \omega^{3 \cdot 2}& \omega^{3 \cdot 3}& \omega^{3 \cdot 4}& \omega^{3 \cdot 5}& \omega^{3 \cdot 6}& \omega^{3 \cdot 7}\\
-\omega^{4 \cdot 0}& \omega^{4 \cdot 1}& \omega^{4 \cdot 2}& \omega^{4 \cdot 3}& \omega^{4 \cdot 4}& \omega^{4 \cdot 5}& \omega^{4 \cdot 6}& \omega^{4 \cdot 7}\\
-\omega^{5 \cdot 0}& \omega^{5 \cdot 1}& \omega^{5 \cdot 2}& \omega^{5 \cdot 3}& \omega^{5 \cdot 4}& \omega^{5 \cdot 5}& \omega^{5 \cdot 6}& \omega^{5 \cdot 7}\\
-\omega^{6 \cdot 0}& \omega^{6 \cdot 1}& \omega^{6 \cdot 2}& \omega^{6 \cdot 3}& \omega^{6 \cdot 4}& \omega^{6 \cdot 5}& \omega^{6 \cdot 6}& \omega^{6 \cdot 7}\\
-\omega^{7 \cdot 0}& \omega^{7 \cdot 1}& \omega^{7 \cdot 2}& \omega^{7 \cdot 3}& \omega^{7 \cdot 4}& \omega^{7 \cdot 5}& \omega^{7 \cdot 6}& \omega^{7 \cdot 7}
+\omega^{0 \cdot 0}&amp; \omega^{0 \cdot 1}&amp; \omega^{0 \cdot 2}&amp;
+\omega^{0 \cdot 3}&amp; \omega^{0 \cdot 4}&amp; \omega^{0 \cdot 5}&amp;
+\omega^{0 \cdot 6}&amp; \omega^{0 \cdot 7}\\
+\omega^{1 \cdot 0}&amp; \omega^{1 \cdot 1}&amp; \omega^{1 \cdot 2}&amp;
+\omega^{1 \cdot 3}&amp; \omega^{1 \cdot 4}&amp; \omega^{1 \cdot 5}&amp;
+\omega^{1 \cdot 6}&amp; \omega^{1 \cdot 7}\\
+\omega^{2 \cdot 0}&amp; \omega^{2 \cdot 1}&amp; \omega^{2 \cdot 2}&amp;
+\omega^{2 \cdot 3}&amp; \omega^{2 \cdot 4}&amp; \omega^{2 \cdot 5}&amp;
+\omega^{2 \cdot 6}&amp; \omega^{2 \cdot 7}\\
+\omega^{3 \cdot 0}&amp; \omega^{3 \cdot 1}&amp; \omega^{3 \cdot 2}&amp;
+\omega^{3 \cdot 3}&amp; \omega^{3 \cdot 4}&amp; \omega^{3 \cdot 5}&amp;
+\omega^{3 \cdot 6}&amp; \omega^{3 \cdot 7}\\
+\omega^{4 \cdot 0}&amp; \omega^{4 \cdot 1}&amp; \omega^{4 \cdot 2}&amp;
+\omega^{4 \cdot 3}&amp; \omega^{4 \cdot 4}&amp; \omega^{4 \cdot 5}&amp;
+\omega^{4 \cdot 6}&amp; \omega^{4 \cdot 7}\\
+\omega^{5 \cdot 0}&amp; \omega^{5 \cdot 1}&amp; \omega^{5 \cdot 2}&amp;
+\omega^{5 \cdot 3}&amp; \omega^{5 \cdot 4}&amp; \omega^{5 \cdot 5}&amp;
+\omega^{5 \cdot 6}&amp; \omega^{5 \cdot 7}\\
+\omega^{6 \cdot 0}&amp; \omega^{6 \cdot 1}&amp; \omega^{6 \cdot 2}&amp;
+\omega^{6 \cdot 3}&amp; \omega^{6 \cdot 4}&amp; \omega^{6 \cdot 5}&amp;
+\omega^{6 \cdot 6}&amp; \omega^{6 \cdot 7}\\
+\omega^{7 \cdot 0}&amp; \omega^{7 \cdot 1}&amp; \omega^{7 \cdot 2}&amp;
+\omega^{7 \cdot 3}&amp; \omega^{7 \cdot 4}&amp; \omega^{7 \cdot 5}&amp;
+\omega^{7 \cdot 6}&amp; \omega^{7 \cdot 7}
 \end{bmatrix}\begin{bmatrix}
 a_0 \\
 a_1\\
@@ -174,83 +265,145 @@ a_4 \\
 a_5 \\
 a_6 \\
 a_7
-\end{bmatrix}</script><p><del><em>p.s:突然发现这好像就是我当时参加的<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/550939115">TACA</a>的原题啊喂</em></del></p>
-<p>不妨把这个大矩阵记作$W$</p>
-<script type="math/tex; mode=display">
-W = (\omega^{ij})_{i,j = 0,1,\cdots,n-1},\omega = e^{\frac{2i\pi}{n}}</script><p>想要实现从点列表示转成系数表示，就需要求得这个$W$矩阵的逆矩阵$W^{-1}$</p>
-<h3 id="离散傅里叶变换矩阵-Discrete-Fourier-Transform-matrix-DFTmtx"><a href="#离散傅里叶变换矩阵-Discrete-Fourier-Transform-matrix-DFTmtx" class="headerlink" title="离散傅里叶变换矩阵(Discrete Fourier Transform matrix,DFTmtx)"></a>离散傅里叶变换矩阵(Discrete Fourier Transform matrix,DFTmtx)</h3><blockquote>
-<p> <strong>离散傅立叶变换矩阵是将离散傅立叶变换以矩阵乘法来表达的一种表示式</strong></p>
+\end{bmatrix}
+\]</span> <del><em>p.s:突然发现这好像就是我当时参加的<a
+target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/550939115">TACA</a>的原题啊喂</em></del></p>
+<p>不妨把这个大矩阵记作<span class="math inline">\(W\)</span> <span
+class="math display">\[
+W = (\omega^{ij})_{i,j = 0,1,\cdots,n-1},\omega = e^{\frac{2i\pi}{n}}
+\]</span></p>
+<p>想要实现从点列表示转成系数表示，就需要求得这个<span
+class="math inline">\(W\)</span>矩阵的逆矩阵<span
+class="math inline">\(W^{-1}\)</span></p>
+<h3
+id="离散傅里叶变换矩阵discrete-fourier-transform-matrixdftmtx">离散傅里叶变换矩阵(Discrete
+Fourier Transform matrix,DFTmtx)</h3>
+<blockquote>
+<p><strong>离散傅立叶变换矩阵是将离散傅立叶变换以矩阵乘法来表达的一种表示式</strong></p>
 </blockquote>
-<p>DFT矩阵定义</p>
-<script type="math/tex; mode=display">
-W = (\omega^{ij})_{i,j = 0,1,\cdots,N-1}/\sqrt{N},\omega = e^{\frac{-2i\pi}{N}}\\</script><p>或</p>
-<script type="math/tex; mode=display">
+<p>DFT矩阵定义 <span class="math display">\[
+W = (\omega^{ij})_{i,j = 0,1,\cdots,N-1}/\sqrt{N},\omega =
+e^{\frac{-2i\pi}{N}}\\
+\]</span> 或 <span class="math display">\[
 W=
 \frac{1}{\sqrt{N}}\begin{bmatrix}
-\omega ^{0 \cdot 0}& \omega ^{0 \cdot 1}& \cdots & \omega ^{0 \cdot (N-1)}\\
-\omega ^{1 \cdot 0}& \omega ^{1 \cdot 1}& \cdots & \omega ^{1 \cdot (N-1)}\\
-\vdots& \vdots & \ddots & \vdots \\
-\omega ^{(N-1) \cdot 0}& \omega ^{(N-1) \cdot 1}& \cdots & \omega ^{(N-1) \cdot (N-1)}\\
+\omega ^{0 \cdot 0}&amp; \omega ^{0 \cdot 1}&amp; \cdots &amp; \omega
+^{0 \cdot (N-1)}\\
+\omega ^{1 \cdot 0}&amp; \omega ^{1 \cdot 1}&amp; \cdots &amp; \omega
+^{1 \cdot (N-1)}\\
+\vdots&amp; \vdots &amp; \ddots &amp; \vdots \\
+\omega ^{(N-1) \cdot 0}&amp; \omega ^{(N-1) \cdot 1}&amp; \cdots &amp;
+\omega ^{(N-1) \cdot (N-1)}\\
 \end{bmatrix},
-\omega  = e^{\frac{-2i\pi}{N}}</script><p><em>注意：此处$\omega$在指数上是否存在负号区别于之前的$\omega$，同时此处矩阵$W$有正规化因数$\frac{1}{\sqrt{N}}$</em></p>
-<p>其逆矩阵是</p>
-<script type="math/tex; mode=display">
+\omega  = e^{\frac{-2i\pi}{N}}
+\]</span></p>
+<p><em>注意：此处<span
+class="math inline">\(\omega\)</span>在指数上是否存在负号区别于之前的<span
+class="math inline">\(\omega\)</span>，同时此处矩阵<span
+class="math inline">\(W\)</span>有正规化因数<span
+class="math inline">\(\frac{1}{\sqrt{N}}\)</span></em></p>
+<p>其逆矩阵是 <span class="math display">\[
 T=
 \frac{1}{\sqrt{N}}\begin{bmatrix}
-\tau ^{0 \cdot 0}& \tau ^{0 \cdot 1}& \cdots & \tau ^{0 \cdot (N-1)}\\
-\tau ^{1 \cdot 0}& \tau ^{1 \cdot 1}& \cdots & \tau ^{1 \cdot (N-1)}\\
-\vdots& \vdots & \ddots & \vdots \\
-\tau ^{(N-1) \cdot 0}& \tau ^{(N-1) \cdot 1}& \cdots & \tau ^{(N-1) \cdot (N-1)}\\
+\tau ^{0 \cdot 0}&amp; \tau ^{0 \cdot 1}&amp; \cdots &amp; \tau ^{0
+\cdot (N-1)}\\
+\tau ^{1 \cdot 0}&amp; \tau ^{1 \cdot 1}&amp; \cdots &amp; \tau ^{1
+\cdot (N-1)}\\
+\vdots&amp; \vdots &amp; \ddots &amp; \vdots \\
+\tau ^{(N-1) \cdot 0}&amp; \tau ^{(N-1) \cdot 1}&amp; \cdots &amp; \tau
+^{(N-1) \cdot (N-1)}\\
 \end{bmatrix},
-\tau  = e^{\frac{2i\pi}{N}}=\omega ^{-1}</script><p>下验证$WT=I$</p>
-<script type="math/tex; mode=display">
+\tau  = e^{\frac{2i\pi}{N}}=\omega ^{-1}
+\]</span> 下验证<span class="math inline">\(WT=I\)</span> <span
+class="math display">\[
 \begin{align}
-N(WT)_{ij} 
-&=  N \sum_{k=1}^{N}{W_{ik}T_{kj}}\\
-&= \sum_{k=1}^{N}{\omega^{ik}\tau^{kj}}\\
-&= \sum_{k=1}^{N}{\omega^{ik}\omega^{-kj}}\\
-&= \sum_{k=1}^{N}{\omega^{k(i-j)}}
-\end{align}</script><p>当且仅当$i=j$时有</p>
-<script type="math/tex; mode=display">
+N(WT)_{ij}
+&amp;=  N \sum_{k=1}^{N}{W_{ik}T_{kj}}\\
+&amp;= \sum_{k=1}^{N}{\omega^{ik}\tau^{kj}}\\
+&amp;= \sum_{k=1}^{N}{\omega^{ik}\omega^{-kj}}\\
+&amp;= \sum_{k=1}^{N}{\omega^{k(i-j)}}
+\end{align}
+\]</span> 当且仅当<span class="math inline">\(i=j\)</span>时有 <span
+class="math display">\[
 \begin{align}
-N(WT)_{ij} 
-&= \sum_{k=1}^{N}{\omega^{k(i-j)}}\\
-&= \sum_{k=1}^{N}{\omega^{0}}\\
-&= N\\
+N(WT)_{ij}
+&amp;= \sum_{k=1}^{N}{\omega^{k(i-j)}}\\
+&amp;= \sum_{k=1}^{N}{\omega^{0}}\\
+&amp;= N\\
 \therefore (WT)_{ij}=1,i = j
-\end{align}</script><p>当$i \ne j$时有</p>
-<script type="math/tex; mode=display">
+\end{align}
+\]</span> 当<span class="math inline">\(i \ne j\)</span>时有 <span
+class="math display">\[
 \begin{align}
-N(WT)_{ij} 
-&= \sum_{k=1}^{N}{\omega^{k(i-j)}}\\
-&= \sum_{k=1}^{\frac{N}{2}}{\omega^{k(i-j)}} + \sum_{k=1}^{\frac{N}{2}}{\omega^{(k+\frac{N}{2})(i-j)}}\\
-&= \sum_{k=1}^{\frac{N}{2}}{e^{\frac{-2i\pi}{N}k(i-j)}} + \sum_{k=1}^{\frac{N}{2}}{e^{\frac{-2i\pi}{N}k(i-j)-i\pi k(i-j)}}\\
-&= \sum_{k=1}^{\frac{N}{2}}{e^{\frac{-2i\pi}{N}k(i-j)}} - \sum_{k=1}^{\frac{N}{2}}{e^{\frac{-2i\pi}{N}k(i-j)}}\\
-&= 0\\
+N(WT)_{ij}
+&amp;= \sum_{k=1}^{N}{\omega^{k(i-j)}}\\
+&amp;= \sum_{k=1}^{\frac{N}{2}}{\omega^{k(i-j)}} +
+\sum_{k=1}^{\frac{N}{2}}{\omega^{(k+\frac{N}{2})(i-j)}}\\
+&amp;= \sum_{k=1}^{\frac{N}{2}}{e^{\frac{-2i\pi}{N}k(i-j)}} +
+\sum_{k=1}^{\frac{N}{2}}{e^{\frac{-2i\pi}{N}k(i-j)-i\pi k(i-j)}}\\
+&amp;= \sum_{k=1}^{\frac{N}{2}}{e^{\frac{-2i\pi}{N}k(i-j)}} -
+\sum_{k=1}^{\frac{N}{2}}{e^{\frac{-2i\pi}{N}k(i-j)}}\\
+&amp;= 0\\
 \therefore (WT)_{ij}=0,i \ne j
-\end{align}</script><p>至此$WT=I$验证完毕</p>
-<h3 id="快速傅里叶逆变换-Inverse-Fast-Fourier-Transform-IFFT"><a href="#快速傅里叶逆变换-Inverse-Fast-Fourier-Transform-IFFT" class="headerlink" title="快速傅里叶逆变换(Inverse Fast Fourier Transform,IFFT)"></a>快速傅里叶逆变换(Inverse Fast Fourier Transform,IFFT)</h3><p>根据上面的式子，我们得到了</p>
-<script type="math/tex; mode=display">
+\end{align}
+\]</span> 至此<span class="math inline">\(WT=I\)</span>验证完毕</p>
+<h3
+id="快速傅里叶逆变换inverse-fast-fourier-transformifft">快速傅里叶逆变换(Inverse
+Fast Fourier Transform,IFFT)</h3>
+<p>根据上面的式子，我们得到了 <span class="math display">\[
 \begin{bmatrix}
-\omega^{0 \cdot 0}& \omega^{0 \cdot 1}& \omega^{0 \cdot 2}& \omega^{0 \cdot 3}& \omega^{0 \cdot 4}& \omega^{0 \cdot 5}& \omega^{0 \cdot 6}& \omega^{0 \cdot 7}\\
-\omega^{1 \cdot 0}& \omega^{1 \cdot 1}& \omega^{1 \cdot 2}& \omega^{1 \cdot 3}& \omega^{1 \cdot 4}& \omega^{1 \cdot 5}& \omega^{1 \cdot 6}& \omega^{1 \cdot 7}\\
-\omega^{2 \cdot 0}& \omega^{2 \cdot 1}& \omega^{2 \cdot 2}& \omega^{2 \cdot 3}& \omega^{2 \cdot 4}& \omega^{2 \cdot 5}& \omega^{2 \cdot 6}& \omega^{2 \cdot 7}\\
-\omega^{3 \cdot 0}& \omega^{3 \cdot 1}& \omega^{3 \cdot 2}& \omega^{3 \cdot 3}& \omega^{3 \cdot 4}& \omega^{3 \cdot 5}& \omega^{3 \cdot 6}& \omega^{3 \cdot 7}\\
-\omega^{4 \cdot 0}& \omega^{4 \cdot 1}& \omega^{4 \cdot 2}& \omega^{4 \cdot 3}& \omega^{4 \cdot 4}& \omega^{4 \cdot 5}& \omega^{4 \cdot 6}& \omega^{4 \cdot 7}\\
-\omega^{5 \cdot 0}& \omega^{5 \cdot 1}& \omega^{5 \cdot 2}& \omega^{5 \cdot 3}& \omega^{5 \cdot 4}& \omega^{5 \cdot 5}& \omega^{5 \cdot 6}& \omega^{5 \cdot 7}\\
-\omega^{6 \cdot 0}& \omega^{6 \cdot 1}& \omega^{6 \cdot 2}& \omega^{6 \cdot 3}& \omega^{6 \cdot 4}& \omega^{6 \cdot 5}& \omega^{6 \cdot 6}& \omega^{6 \cdot 7}\\
-\omega^{7 \cdot 0}& \omega^{7 \cdot 1}& \omega^{7 \cdot 2}& \omega^{7 \cdot 3}& \omega^{7 \cdot 4}& \omega^{7 \cdot 5}& \omega^{7 \cdot 6}& \omega^{7 \cdot 7}
+\omega^{0 \cdot 0}&amp; \omega^{0 \cdot 1}&amp; \omega^{0 \cdot 2}&amp;
+\omega^{0 \cdot 3}&amp; \omega^{0 \cdot 4}&amp; \omega^{0 \cdot 5}&amp;
+\omega^{0 \cdot 6}&amp; \omega^{0 \cdot 7}\\
+\omega^{1 \cdot 0}&amp; \omega^{1 \cdot 1}&amp; \omega^{1 \cdot 2}&amp;
+\omega^{1 \cdot 3}&amp; \omega^{1 \cdot 4}&amp; \omega^{1 \cdot 5}&amp;
+\omega^{1 \cdot 6}&amp; \omega^{1 \cdot 7}\\
+\omega^{2 \cdot 0}&amp; \omega^{2 \cdot 1}&amp; \omega^{2 \cdot 2}&amp;
+\omega^{2 \cdot 3}&amp; \omega^{2 \cdot 4}&amp; \omega^{2 \cdot 5}&amp;
+\omega^{2 \cdot 6}&amp; \omega^{2 \cdot 7}\\
+\omega^{3 \cdot 0}&amp; \omega^{3 \cdot 1}&amp; \omega^{3 \cdot 2}&amp;
+\omega^{3 \cdot 3}&amp; \omega^{3 \cdot 4}&amp; \omega^{3 \cdot 5}&amp;
+\omega^{3 \cdot 6}&amp; \omega^{3 \cdot 7}\\
+\omega^{4 \cdot 0}&amp; \omega^{4 \cdot 1}&amp; \omega^{4 \cdot 2}&amp;
+\omega^{4 \cdot 3}&amp; \omega^{4 \cdot 4}&amp; \omega^{4 \cdot 5}&amp;
+\omega^{4 \cdot 6}&amp; \omega^{4 \cdot 7}\\
+\omega^{5 \cdot 0}&amp; \omega^{5 \cdot 1}&amp; \omega^{5 \cdot 2}&amp;
+\omega^{5 \cdot 3}&amp; \omega^{5 \cdot 4}&amp; \omega^{5 \cdot 5}&amp;
+\omega^{5 \cdot 6}&amp; \omega^{5 \cdot 7}\\
+\omega^{6 \cdot 0}&amp; \omega^{6 \cdot 1}&amp; \omega^{6 \cdot 2}&amp;
+\omega^{6 \cdot 3}&amp; \omega^{6 \cdot 4}&amp; \omega^{6 \cdot 5}&amp;
+\omega^{6 \cdot 6}&amp; \omega^{6 \cdot 7}\\
+\omega^{7 \cdot 0}&amp; \omega^{7 \cdot 1}&amp; \omega^{7 \cdot 2}&amp;
+\omega^{7 \cdot 3}&amp; \omega^{7 \cdot 4}&amp; \omega^{7 \cdot 5}&amp;
+\omega^{7 \cdot 6}&amp; \omega^{7 \cdot 7}
 \end{bmatrix}\begin{bmatrix}
-\tau^{0 \cdot 0}& \tau^{0 \cdot 1}& \tau^{0 \cdot 2}& \tau^{0 \cdot 3}& \tau^{0 \cdot 4}& \tau^{0 \cdot 5}& \tau^{0 \cdot 6}& \tau^{0 \cdot 7}\\
-\tau^{1 \cdot 0}& \tau^{1 \cdot 1}& \tau^{1 \cdot 2}& \tau^{1 \cdot 3}& \tau^{1 \cdot 4}& \tau^{1 \cdot 5}& \tau^{1 \cdot 6}& \tau^{1 \cdot 7}\\
-\tau^{2 \cdot 0}& \tau^{2 \cdot 1}& \tau^{2 \cdot 2}& \tau^{2 \cdot 3}& \tau^{2 \cdot 4}& \tau^{2 \cdot 5}& \tau^{2 \cdot 6}& \tau^{2 \cdot 7}\\
-\tau^{3 \cdot 0}& \tau^{3 \cdot 1}& \tau^{3 \cdot 2}& \tau^{3 \cdot 3}& \tau^{3 \cdot 4}& \tau^{3 \cdot 5}& \tau^{3 \cdot 6}& \tau^{3 \cdot 7}\\
-\tau^{4 \cdot 0}& \tau^{4 \cdot 1}& \tau^{4 \cdot 2}& \tau^{4 \cdot 3}& \tau^{4 \cdot 4}& \tau^{4 \cdot 5}& \tau^{4 \cdot 6}& \tau^{4 \cdot 7}\\
-\tau^{5 \cdot 0}& \tau^{5 \cdot 1}& \tau^{5 \cdot 2}& \tau^{5 \cdot 3}& \tau^{5 \cdot 4}& \tau^{5 \cdot 5}& \tau^{5 \cdot 6}& \tau^{5 \cdot 7}\\
-\tau^{6 \cdot 0}& \tau^{6 \cdot 1}& \tau^{6 \cdot 2}& \tau^{6 \cdot 3}& \tau^{6 \cdot 4}& \tau^{6 \cdot 5}& \tau^{6 \cdot 6}& \tau^{6 \cdot 7}\\
-\tau^{7 \cdot 0}& \tau^{7 \cdot 1}& \tau^{7 \cdot 2}& \tau^{7 \cdot 3}& \tau^{7 \cdot 4}& \tau^{7 \cdot 5}& \tau^{7 \cdot 6}& \tau^{7 \cdot 7}
-\end{bmatrix}=nI</script><p>那么回到最先的式子</p>
-<script type="math/tex; mode=display">
+\tau^{0 \cdot 0}&amp; \tau^{0 \cdot 1}&amp; \tau^{0 \cdot 2}&amp;
+\tau^{0 \cdot 3}&amp; \tau^{0 \cdot 4}&amp; \tau^{0 \cdot 5}&amp;
+\tau^{0 \cdot 6}&amp; \tau^{0 \cdot 7}\\
+\tau^{1 \cdot 0}&amp; \tau^{1 \cdot 1}&amp; \tau^{1 \cdot 2}&amp;
+\tau^{1 \cdot 3}&amp; \tau^{1 \cdot 4}&amp; \tau^{1 \cdot 5}&amp;
+\tau^{1 \cdot 6}&amp; \tau^{1 \cdot 7}\\
+\tau^{2 \cdot 0}&amp; \tau^{2 \cdot 1}&amp; \tau^{2 \cdot 2}&amp;
+\tau^{2 \cdot 3}&amp; \tau^{2 \cdot 4}&amp; \tau^{2 \cdot 5}&amp;
+\tau^{2 \cdot 6}&amp; \tau^{2 \cdot 7}\\
+\tau^{3 \cdot 0}&amp; \tau^{3 \cdot 1}&amp; \tau^{3 \cdot 2}&amp;
+\tau^{3 \cdot 3}&amp; \tau^{3 \cdot 4}&amp; \tau^{3 \cdot 5}&amp;
+\tau^{3 \cdot 6}&amp; \tau^{3 \cdot 7}\\
+\tau^{4 \cdot 0}&amp; \tau^{4 \cdot 1}&amp; \tau^{4 \cdot 2}&amp;
+\tau^{4 \cdot 3}&amp; \tau^{4 \cdot 4}&amp; \tau^{4 \cdot 5}&amp;
+\tau^{4 \cdot 6}&amp; \tau^{4 \cdot 7}\\
+\tau^{5 \cdot 0}&amp; \tau^{5 \cdot 1}&amp; \tau^{5 \cdot 2}&amp;
+\tau^{5 \cdot 3}&amp; \tau^{5 \cdot 4}&amp; \tau^{5 \cdot 5}&amp;
+\tau^{5 \cdot 6}&amp; \tau^{5 \cdot 7}\\
+\tau^{6 \cdot 0}&amp; \tau^{6 \cdot 1}&amp; \tau^{6 \cdot 2}&amp;
+\tau^{6 \cdot 3}&amp; \tau^{6 \cdot 4}&amp; \tau^{6 \cdot 5}&amp;
+\tau^{6 \cdot 6}&amp; \tau^{6 \cdot 7}\\
+\tau^{7 \cdot 0}&amp; \tau^{7 \cdot 1}&amp; \tau^{7 \cdot 2}&amp;
+\tau^{7 \cdot 3}&amp; \tau^{7 \cdot 4}&amp; \tau^{7 \cdot 5}&amp;
+\tau^{7 \cdot 6}&amp; \tau^{7 \cdot 7}
+\end{bmatrix}=nI
+\]</span></p>
+<p>那么回到最先的式子 <span class="math display">\[
 \begin{bmatrix}
 f(\omega^0) \\
 f(\omega^1) \\
@@ -263,14 +416,30 @@ f(\omega^7)
 \end{bmatrix}
 =
 \begin{bmatrix}
-\omega^{0 \cdot 0}& \omega^{0 \cdot 1}& \omega^{0 \cdot 2}& \omega^{0 \cdot 3}& \omega^{0 \cdot 4}& \omega^{0 \cdot 5}& \omega^{0 \cdot 6}& \omega^{0 \cdot 7}\\
-\omega^{1 \cdot 0}& \omega^{1 \cdot 1}& \omega^{1 \cdot 2}& \omega^{1 \cdot 3}& \omega^{1 \cdot 4}& \omega^{1 \cdot 5}& \omega^{1 \cdot 6}& \omega^{1 \cdot 7}\\
-\omega^{2 \cdot 0}& \omega^{2 \cdot 1}& \omega^{2 \cdot 2}& \omega^{2 \cdot 3}& \omega^{2 \cdot 4}& \omega^{2 \cdot 5}& \omega^{2 \cdot 6}& \omega^{2 \cdot 7}\\
-\omega^{3 \cdot 0}& \omega^{3 \cdot 1}& \omega^{3 \cdot 2}& \omega^{3 \cdot 3}& \omega^{3 \cdot 4}& \omega^{3 \cdot 5}& \omega^{3 \cdot 6}& \omega^{3 \cdot 7}\\
-\omega^{4 \cdot 0}& \omega^{4 \cdot 1}& \omega^{4 \cdot 2}& \omega^{4 \cdot 3}& \omega^{4 \cdot 4}& \omega^{4 \cdot 5}& \omega^{4 \cdot 6}& \omega^{4 \cdot 7}\\
-\omega^{5 \cdot 0}& \omega^{5 \cdot 1}& \omega^{5 \cdot 2}& \omega^{5 \cdot 3}& \omega^{5 \cdot 4}& \omega^{5 \cdot 5}& \omega^{5 \cdot 6}& \omega^{5 \cdot 7}\\
-\omega^{6 \cdot 0}& \omega^{6 \cdot 1}& \omega^{6 \cdot 2}& \omega^{6 \cdot 3}& \omega^{6 \cdot 4}& \omega^{6 \cdot 5}& \omega^{6 \cdot 6}& \omega^{6 \cdot 7}\\
-\omega^{7 \cdot 0}& \omega^{7 \cdot 1}& \omega^{7 \cdot 2}& \omega^{7 \cdot 3}& \omega^{7 \cdot 4}& \omega^{7 \cdot 5}& \omega^{7 \cdot 6}& \omega^{7 \cdot 7}
+\omega^{0 \cdot 0}&amp; \omega^{0 \cdot 1}&amp; \omega^{0 \cdot 2}&amp;
+\omega^{0 \cdot 3}&amp; \omega^{0 \cdot 4}&amp; \omega^{0 \cdot 5}&amp;
+\omega^{0 \cdot 6}&amp; \omega^{0 \cdot 7}\\
+\omega^{1 \cdot 0}&amp; \omega^{1 \cdot 1}&amp; \omega^{1 \cdot 2}&amp;
+\omega^{1 \cdot 3}&amp; \omega^{1 \cdot 4}&amp; \omega^{1 \cdot 5}&amp;
+\omega^{1 \cdot 6}&amp; \omega^{1 \cdot 7}\\
+\omega^{2 \cdot 0}&amp; \omega^{2 \cdot 1}&amp; \omega^{2 \cdot 2}&amp;
+\omega^{2 \cdot 3}&amp; \omega^{2 \cdot 4}&amp; \omega^{2 \cdot 5}&amp;
+\omega^{2 \cdot 6}&amp; \omega^{2 \cdot 7}\\
+\omega^{3 \cdot 0}&amp; \omega^{3 \cdot 1}&amp; \omega^{3 \cdot 2}&amp;
+\omega^{3 \cdot 3}&amp; \omega^{3 \cdot 4}&amp; \omega^{3 \cdot 5}&amp;
+\omega^{3 \cdot 6}&amp; \omega^{3 \cdot 7}\\
+\omega^{4 \cdot 0}&amp; \omega^{4 \cdot 1}&amp; \omega^{4 \cdot 2}&amp;
+\omega^{4 \cdot 3}&amp; \omega^{4 \cdot 4}&amp; \omega^{4 \cdot 5}&amp;
+\omega^{4 \cdot 6}&amp; \omega^{4 \cdot 7}\\
+\omega^{5 \cdot 0}&amp; \omega^{5 \cdot 1}&amp; \omega^{5 \cdot 2}&amp;
+\omega^{5 \cdot 3}&amp; \omega^{5 \cdot 4}&amp; \omega^{5 \cdot 5}&amp;
+\omega^{5 \cdot 6}&amp; \omega^{5 \cdot 7}\\
+\omega^{6 \cdot 0}&amp; \omega^{6 \cdot 1}&amp; \omega^{6 \cdot 2}&amp;
+\omega^{6 \cdot 3}&amp; \omega^{6 \cdot 4}&amp; \omega^{6 \cdot 5}&amp;
+\omega^{6 \cdot 6}&amp; \omega^{6 \cdot 7}\\
+\omega^{7 \cdot 0}&amp; \omega^{7 \cdot 1}&amp; \omega^{7 \cdot 2}&amp;
+\omega^{7 \cdot 3}&amp; \omega^{7 \cdot 4}&amp; \omega^{7 \cdot 5}&amp;
+\omega^{7 \cdot 6}&amp; \omega^{7 \cdot 7}
 \end{bmatrix}
 \begin{bmatrix}
 a_0 \\
@@ -281,13 +450,13 @@ a_4 \\
 a_5 \\
 a_6 \\
 a_7
-\end{bmatrix}\\</script><p>可以有</p>
-<script type="math/tex; mode=display">
+\end{bmatrix}\\
+\]</span> 可以有 <span class="math display">\[
 F=WA\\
 W^{-1}F=W^{-1}WA\\
 A = W^{-1}F\\
-A = \frac{1}{n}TF</script><p>即</p>
-<script type="math/tex; mode=display">
+A = \frac{1}{n}TF
+\]</span> 即 <span class="math display">\[
 \begin{bmatrix}
 a_0 \\
 a_1\\
@@ -300,14 +469,30 @@ a_7
 \end{bmatrix}\\
 =\frac{1}{n}
 \begin{bmatrix}
-\tau^{0 \cdot 0}& \tau^{0 \cdot 1}& \tau^{0 \cdot 2}& \tau^{0 \cdot 3}& \tau^{0 \cdot 4}& \tau^{0 \cdot 5}& \tau^{0 \cdot 6}& \tau^{0 \cdot 7}\\
-\tau^{1 \cdot 0}& \tau^{1 \cdot 1}& \tau^{1 \cdot 2}& \tau^{1 \cdot 3}& \tau^{1 \cdot 4}& \tau^{1 \cdot 5}& \tau^{1 \cdot 6}& \tau^{1 \cdot 7}\\
-\tau^{2 \cdot 0}& \tau^{2 \cdot 1}& \tau^{2 \cdot 2}& \tau^{2 \cdot 3}& \tau^{2 \cdot 4}& \tau^{2 \cdot 5}& \tau^{2 \cdot 6}& \tau^{2 \cdot 7}\\
-\tau^{3 \cdot 0}& \tau^{3 \cdot 1}& \tau^{3 \cdot 2}& \tau^{3 \cdot 3}& \tau^{3 \cdot 4}& \tau^{3 \cdot 5}& \tau^{3 \cdot 6}& \tau^{3 \cdot 7}\\
-\tau^{4 \cdot 0}& \tau^{4 \cdot 1}& \tau^{4 \cdot 2}& \tau^{4 \cdot 3}& \tau^{4 \cdot 4}& \tau^{4 \cdot 5}& \tau^{4 \cdot 6}& \tau^{4 \cdot 7}\\
-\tau^{5 \cdot 0}& \tau^{5 \cdot 1}& \tau^{5 \cdot 2}& \tau^{5 \cdot 3}& \tau^{5 \cdot 4}& \tau^{5 \cdot 5}& \tau^{5 \cdot 6}& \tau^{5 \cdot 7}\\
-\tau^{6 \cdot 0}& \tau^{6 \cdot 1}& \tau^{6 \cdot 2}& \tau^{6 \cdot 3}& \tau^{6 \cdot 4}& \tau^{6 \cdot 5}& \tau^{6 \cdot 6}& \tau^{6 \cdot 7}\\
-\tau^{7 \cdot 0}& \tau^{7 \cdot 1}& \tau^{7 \cdot 2}& \tau^{7 \cdot 3}& \tau^{7 \cdot 4}& \tau^{7 \cdot 5}& \tau^{7 \cdot 6}& \tau^{7 \cdot 7}
+\tau^{0 \cdot 0}&amp; \tau^{0 \cdot 1}&amp; \tau^{0 \cdot 2}&amp;
+\tau^{0 \cdot 3}&amp; \tau^{0 \cdot 4}&amp; \tau^{0 \cdot 5}&amp;
+\tau^{0 \cdot 6}&amp; \tau^{0 \cdot 7}\\
+\tau^{1 \cdot 0}&amp; \tau^{1 \cdot 1}&amp; \tau^{1 \cdot 2}&amp;
+\tau^{1 \cdot 3}&amp; \tau^{1 \cdot 4}&amp; \tau^{1 \cdot 5}&amp;
+\tau^{1 \cdot 6}&amp; \tau^{1 \cdot 7}\\
+\tau^{2 \cdot 0}&amp; \tau^{2 \cdot 1}&amp; \tau^{2 \cdot 2}&amp;
+\tau^{2 \cdot 3}&amp; \tau^{2 \cdot 4}&amp; \tau^{2 \cdot 5}&amp;
+\tau^{2 \cdot 6}&amp; \tau^{2 \cdot 7}\\
+\tau^{3 \cdot 0}&amp; \tau^{3 \cdot 1}&amp; \tau^{3 \cdot 2}&amp;
+\tau^{3 \cdot 3}&amp; \tau^{3 \cdot 4}&amp; \tau^{3 \cdot 5}&amp;
+\tau^{3 \cdot 6}&amp; \tau^{3 \cdot 7}\\
+\tau^{4 \cdot 0}&amp; \tau^{4 \cdot 1}&amp; \tau^{4 \cdot 2}&amp;
+\tau^{4 \cdot 3}&amp; \tau^{4 \cdot 4}&amp; \tau^{4 \cdot 5}&amp;
+\tau^{4 \cdot 6}&amp; \tau^{4 \cdot 7}\\
+\tau^{5 \cdot 0}&amp; \tau^{5 \cdot 1}&amp; \tau^{5 \cdot 2}&amp;
+\tau^{5 \cdot 3}&amp; \tau^{5 \cdot 4}&amp; \tau^{5 \cdot 5}&amp;
+\tau^{5 \cdot 6}&amp; \tau^{5 \cdot 7}\\
+\tau^{6 \cdot 0}&amp; \tau^{6 \cdot 1}&amp; \tau^{6 \cdot 2}&amp;
+\tau^{6 \cdot 3}&amp; \tau^{6 \cdot 4}&amp; \tau^{6 \cdot 5}&amp;
+\tau^{6 \cdot 6}&amp; \tau^{6 \cdot 7}\\
+\tau^{7 \cdot 0}&amp; \tau^{7 \cdot 1}&amp; \tau^{7 \cdot 2}&amp;
+\tau^{7 \cdot 3}&amp; \tau^{7 \cdot 4}&amp; \tau^{7 \cdot 5}&amp;
+\tau^{7 \cdot 6}&amp; \tau^{7 \cdot 7}
 \end{bmatrix}
 \begin{bmatrix}
 f(\omega^0) \\
@@ -318,14 +503,21 @@ f(\omega^4) \\
 f(\omega^5) \\
 f(\omega^6) \\
 f(\omega^7)
-\end{bmatrix}</script><p>由于</p>
-<script type="math/tex; mode=display">
-\omega \tau=1</script><p>这意味着先前得出的FFT逻辑完全可以把所有的$\omega$换成$\tau$便可完成IFFT的过程，再一次实现函数复用</p>
-<p>现在剩余一个问题，$\omega$是一个复数，在$n$不大的情况下计算误差不大，但是当$n$很大，计算误差和三角函数计算时间都是问题，于是要引入有限域</p>
-<h3 id="有限域-finite-field"><a href="#有限域-finite-field" class="headerlink" title="有限域(finite field)"></a>有限域(finite field)</h3><p>一点儿没学明白，查资料也写不出来多少$QAQ$</p>
+\end{bmatrix}
+\]</span> 由于 <span class="math display">\[
+\omega \tau=1
+\]</span> 这意味着先前得出的FFT逻辑完全可以把所有的<span
+class="math inline">\(\omega\)</span>换成<span
+class="math inline">\(\tau\)</span>便可完成IFFT的过程，再一次实现函数复用</p>
+<p>现在剩余一个问题，<span
+class="math inline">\(\omega\)</span>是一个复数，在<span
+class="math inline">\(n\)</span>不大的情况下计算误差不大，但是当<span
+class="math inline">\(n\)</span>很大，计算误差和三角函数计算时间都是问题，于是要引入有限域</p>
+<h3 id="有限域finite-field">有限域(finite field)</h3>
+<p>一点儿没学明白，查资料也写不出来多少<span
+class="math inline">\(QAQ\)</span></p>
 <p>大致运算：</p>
-<p>如在$\mathrm{mod} \space 5 $下，</p>
-<script type="math/tex; mode=display">
+<p>如在$ $下， <span class="math display">\[
 1+1 = 2\\
 2+4 = 1\\
 3-4 = 4\\
@@ -335,16 +527,26 @@ f(\omega^7)
 4/3 = 4\times 2 = 3\\
 3\times 3 = 4\\
 2\times 2 = 4\\
-\sqrt{4} = 2,3</script><p>根据此类性质，可以写出C函数如下</p>
+\sqrt{4} = 2,3
+\]</span> 根据此类性质，可以写出C函数如下</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="type">long</span> <span class="type">long</span> <span class="type">int</span> lli;</span><br><span class="line">lli <span class="title function_">ZmodAdd</span><span class="params">(lli a, lli b)</span>&#123;</span><br><span class="line">    a += b;</span><br><span class="line">    <span class="keyword">return</span> (a&lt;MOD_P) ? a : (a-MOD_P);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lli <span class="title function_">ZmodSub</span><span class="params">(lli a, lli b)</span>&#123;</span><br><span class="line">    a -= b;</span><br><span class="line">    <span class="keyword">return</span> (a&gt;=<span class="number">0</span>) ? a : (a+MOD_P);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lli <span class="title function_">ZmodMul</span><span class="params">(lli a, lli b)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (a * b) % MOD_P;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lli <span class="title function_">ZmodInv</span><span class="params">(lli a)</span> &#123;</span><br><span class="line">    <span class="comment">//根据费马小定理，乘法逆元唯一存在</span></span><br><span class="line">    <span class="comment">//利用扩展欧几里得算法求乘法逆元</span></span><br><span class="line">    lli x,y;</span><br><span class="line">    gcdext(a,MOD_P,&amp;x,&amp;y);</span><br><span class="line">    <span class="comment">//x mod p 即为所求逆元，x的范围是正负p/2</span></span><br><span class="line">    <span class="keyword">return</span> (x&gt;=<span class="number">0</span>) ? x : (x+MOD_P);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lli <span class="title function_">ZmodDiv</span><span class="params">(lli a, lli b)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> (a * ZmodInv(b)) % MOD_P;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lli <span class="title function_">gcdext</span><span class="params">(lli a,lli b,lli *x,lli *y)</span>&#123;  <span class="comment">//扩展欧几里得算法，网上抄的</span></span><br><span class="line">    <span class="keyword">if</span>(b==<span class="number">0</span>)&#123;</span><br><span class="line">        *x=<span class="number">1</span>;</span><br><span class="line">        *y=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">return</span> a;</span><br><span class="line">    &#125;</span><br><span class="line">    lli ret=gcdext(b,a%b,x,y);</span><br><span class="line">    lli t=*x;</span><br><span class="line">    *x=*y;</span><br><span class="line">    *y=t-a/b*(*y);</span><br><span class="line">    <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h3 id="快速数论变换-fast-number-theoretic-transform-FNTT-1"><a href="#快速数论变换-fast-number-theoretic-transform-FNTT-1" class="headerlink" title="快速数论变换(fast number-theoretic transform,FNTT)"></a>快速数论变换(fast number-theoretic transform,FNTT)</h3><p>先前FFT中选取$\omega = e^{\frac{2i\pi}{n}}$的性质主要有三：</p>
-<ol>
-<li>所有计算除了系数$a_i$只需要计算$\omega ^{k}$即可，便于计算</li>
-<li>$\omega ^{k+\frac{n}{2}}=-\omega ^{k},\omega^{n}=1$</li>
-<li>$\omega ^{k},k\in Z_{n}$各不相同</li>
+<h3
+id="快速数论变换fast-number-theoretic-transformfntt-1">快速数论变换(fast
+number-theoretic transform,FNTT)</h3>
+<p>先前FFT中选取<span class="math inline">\(\omega =
+e^{\frac{2i\pi}{n}}\)</span>的性质主要有三：</p>
+<ol type="1">
+<li>所有计算除了系数<span
+class="math inline">\(a_i\)</span>只需要计算<span
+class="math inline">\(\omega ^{k}\)</span>即可，便于计算</li>
+<li><span class="math inline">\(\omega ^{k+\frac{n}{2}}=-\omega
+^{k},\omega^{n}=1\)</span></li>
+<li><span class="math inline">\(\omega ^{k},k\in
+Z_{n}\)</span>各不相同</li>
 </ol>
-<p>而在一个有限域内，也同样有数可以满足这两条特性，如$p=84906529,\omega =213016,n=16$，$\omega^k \pmod{p} $的各值如下</p>
-<script type="math/tex; mode=display">
+<p>而在一个有限域内，也同样有数可以满足这两条特性，如<span
+class="math inline">\(p=84906529,\omega =213016,n=16\)</span>，$^k
+$的各值如下 <span class="math display">\[
 \omega^{0}\equiv 1\\
 \omega^{1}\equiv 213016\\
 \omega^{2}\equiv 35729770\\
@@ -361,20 +563,40 @@ f(\omega^7)
 \omega^{13}\equiv 61485630\\
 \omega^{14}\equiv 81422656\\
 \omega^{15}\equiv 47279021\\
-\omega^{16}\equiv 1</script><p>这样的$\omega$也同样符合先前的性质，因此不妨把FFT中的所有运算都转为模$p$数域下的运算，$\omega$换成整数的$\omega$</p>
+\omega^{16}\equiv 1
+\]</span> 这样的<span
+class="math inline">\(\omega\)</span>也同样符合先前的性质，因此不妨把FFT中的所有运算都转为模<span
+class="math inline">\(p\)</span>数域下的运算，<span
+class="math inline">\(\omega\)</span>换成整数的<span
+class="math inline">\(\omega\)</span></p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">FNTT</span><span class="params">(<span class="type">int</span> *pa,<span class="type">int</span> w,List a,<span class="type">int</span> *f)</span>&#123; <span class="comment">//FNTT快速数论变换（基于FFT快速傅里叶变换）</span></span><br><span class="line">    <span class="keyword">if</span> (a.n == <span class="number">1</span>)&#123;</span><br><span class="line">        f[<span class="number">0</span>] = pa[a.begin];</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> nOver2 = a.n&gt;&gt;<span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> stepBy2 = a.step&lt;&lt;<span class="number">1</span>;</span><br><span class="line">    List pe = createList(a.begin, stepBy2, nOver2);</span><br><span class="line">    List po = createList(a.begin+a.step, stepBy2, nOver2);</span><br><span class="line">    <span class="type">int</span> qe[nOver2];</span><br><span class="line">    <span class="type">int</span> qo[nOver2];</span><br><span class="line">    FNTT(pa, ZmodMul(w,w), pe, qe);</span><br><span class="line">    FNTT(pa, ZmodMul(w,w), po, qo);</span><br><span class="line">    <span class="type">int</span> t = <span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> <span class="type">qo_t</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> j=<span class="number">0</span>; j&lt;nOver2; j++)&#123;</span><br><span class="line">        <span class="type">qe_t</span> = ZmodMul(qo[j],t);</span><br><span class="line">        f[j] = ZmodAdd(qe[j] , <span class="type">qo_t</span>);</span><br><span class="line">        f[j+nOver2] = ZmodSub(qe[j] , <span class="type">qo_t</span>);</span><br><span class="line">        t = ZmodMul(w,t);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>那么如何选择$p,\omega$？</p>
-<p>对于质数$p = q2^m+1$，原根$g$满足$g^{q2^k} \equiv 1\pmod{p}$，将$g_n \equiv g^q \pmod{p}$看作$\omega$的等价，则其满足相似的性质</p>
+<p>那么如何选择<span class="math inline">\(p,\omega\)</span>？</p>
+<p>对于质数<span class="math inline">\(p = q2^m+1\)</span>，原根<span
+class="math inline">\(g\)</span>满足<span class="math inline">\(g^{q2^k}
+\equiv 1\pmod{p}\)</span>，将<span class="math inline">\(g_n \equiv g^q
+\pmod{p}\)</span>看作<span
+class="math inline">\(\omega\)</span>的等价，则其满足相似的性质</p>
 <p><del><em>p.s:数论知识好多，不会证明;w;</em></del></p>
 <p>综上，写成完整C语言代码如下</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MOD_P 84906529</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="type">long</span> <span class="type">long</span> <span class="type">int</span> lli;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">int</span> begin;</span><br><span class="line">    <span class="type">int</span> step;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">&#125;List;</span><br><span class="line">List <span class="title function_">createList</span><span class="params">(<span class="type">int</span> begin,<span class="type">int</span> step,<span class="type">int</span> n)</span> &#123;</span><br><span class="line">    List newList;</span><br><span class="line">    newList.begin = begin;</span><br><span class="line">    newList.step = step;</span><br><span class="line">    newList.n = n;</span><br><span class="line">    <span class="keyword">return</span> newList;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Zmod(p)数域计算（c语言好像没有重载运算符，所以表达式看起来会比较麻烦~）</span></span><br><span class="line">lli <span class="title function_">ZmodAdd</span><span class="params">(lli a, lli b)</span>;</span><br><span class="line">lli <span class="title function_">ZmodSub</span><span class="params">(lli a, lli b)</span>;</span><br><span class="line">lli <span class="title function_">ZmodMul</span><span class="params">(lli a, lli b)</span>;</span><br><span class="line">lli <span class="title function_">ZmodInv</span><span class="params">(lli a)</span>;</span><br><span class="line">lli <span class="title function_">ZmodDiv</span><span class="params">(lli a, lli b)</span>;</span><br><span class="line">lli <span class="title function_">gcdext</span><span class="params">(lli a,lli b,lli *x,lli *y)</span>;  <span class="comment">//扩展欧几里得算法</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">FNTT</span><span class="params">(<span class="type">int</span> *pa,<span class="type">int</span> w,List a,<span class="type">int</span> *f)</span>&#123; <span class="comment">//FNTT快速数论变换（基于FFT快速傅里叶变换）</span></span><br><span class="line">    <span class="keyword">if</span> (a.n == <span class="number">1</span>)&#123;</span><br><span class="line">        f[<span class="number">0</span>] = pa[a.begin];</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> nOver2 = a.n&gt;&gt;<span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> stepBy2 = a.step&lt;&lt;<span class="number">1</span>;</span><br><span class="line">    List pe = createList(a.begin, stepBy2, nOver2);</span><br><span class="line">    List po = createList(a.begin+a.step, stepBy2, nOver2);</span><br><span class="line">    <span class="type">int</span> qe[nOver2];</span><br><span class="line">    <span class="type">int</span> qo[nOver2];</span><br><span class="line">    FNTT(pa, ZmodMul(w,w), pe, qe);</span><br><span class="line">    FNTT(pa, ZmodMul(w,w), po, qo);</span><br><span class="line">    <span class="type">int</span> t = <span class="number">1</span>;</span><br><span class="line">    <span class="type">int</span> <span class="type">qo_t</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> j=<span class="number">0</span>; j&lt;nOver2; j++)&#123;</span><br><span class="line">        <span class="type">qe_t</span> = ZmodMul(qo[j],t);</span><br><span class="line">        f[j] = ZmodAdd(qe[j] , <span class="type">qo_t</span>);</span><br><span class="line">        f[j+nOver2] = ZmodSub(qe[j] , <span class="type">qo_t</span>);</span><br><span class="line">        t = ZmodMul(w,t);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> w = <span class="number">213016</span>;</span><br><span class="line">    <span class="type">int</span> t = ZmodInv(w);</span><br><span class="line">    <span class="type">int</span> f[<span class="number">16</span>]     = &#123;<span class="number">5</span>,<span class="number">4</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>&#125;;</span><br><span class="line">    <span class="type">int</span> g[<span class="number">16</span>]     = &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>&#125;;</span><br><span class="line">    <span class="type">int</span> ntt_f[<span class="number">16</span>] = &#123;<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>&#125;;</span><br><span class="line">    <span class="type">int</span> ntt_g[<span class="number">16</span>] = &#123;<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>&#125;;</span><br><span class="line">    <span class="type">int</span> h[<span class="number">16</span>]     = &#123;<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>&#125;;</span><br><span class="line">    <span class="type">int</span> r[<span class="number">16</span>]     = &#123;<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>&#125;;</span><br><span class="line">    List start = createList(<span class="number">0</span>,<span class="number">1</span>,<span class="number">16</span>);</span><br><span class="line">    FNTT(f,w,start,ntt_f);</span><br><span class="line">    FNTT(g,w,start,ntt_g);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i=<span class="number">0</span>; i&lt;<span class="number">16</span>; i++)&#123;</span><br><span class="line">        h[i] = ZmodMul(ntt_f[i],ntt_g[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    FNTT(h,t,start,r);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i=<span class="number">0</span>; i&lt;<span class="number">16</span>; i++)&#123;</span><br><span class="line">        r[i] = ZmodDiv(r[i],<span class="number">16</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i=<span class="number">0</span>; i&lt;<span class="number">16</span>; i++)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d &quot;</span>,r[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lli <span class="title function_">ZmodAdd</span><span class="params">(lli a, lli b)</span>&#123;</span><br><span class="line">    a += b;</span><br><span class="line">    <span class="keyword">return</span> (a&lt;MOD_P) ? a : (a-MOD_P);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lli <span class="title function_">ZmodSub</span><span class="params">(lli a, lli b)</span>&#123;</span><br><span class="line">    a -= b;</span><br><span class="line">    <span class="keyword">return</span> (a&gt;=<span class="number">0</span>) ? a : (a+MOD_P);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lli <span class="title function_">ZmodMul</span><span class="params">(lli a, lli b)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (a * b) % MOD_P;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lli <span class="title function_">ZmodInv</span><span class="params">(lli a)</span> &#123;</span><br><span class="line">    <span class="comment">//根据费马小定理，乘法逆元唯一存在</span></span><br><span class="line">    <span class="comment">//利用扩展欧几里得算法求乘法逆元</span></span><br><span class="line">    lli x,y;</span><br><span class="line">    gcdext(a,MOD_P,&amp;x,&amp;y);</span><br><span class="line">    <span class="comment">//x mod p 即为所求逆元，x的范围是正负p/2</span></span><br><span class="line">    <span class="keyword">return</span> (x&gt;=<span class="number">0</span>) ? x : (x+MOD_P);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lli <span class="title function_">ZmodDiv</span><span class="params">(lli a, lli b)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> (a * ZmodInv(b)) % MOD_P;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lli <span class="title function_">gcdext</span><span class="params">(lli a,lli b,lli *x,lli *y)</span>&#123;  <span class="comment">//扩展欧几里得算法，网上抄的</span></span><br><span class="line">    <span class="keyword">if</span>(b==<span class="number">0</span>)&#123;</span><br><span class="line">        *x=<span class="number">1</span>;</span><br><span class="line">        *y=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">return</span> a;</span><br><span class="line">    &#125;</span><br><span class="line">    lli ret=gcdext(b,a%b,x,y);</span><br><span class="line">    lli t=*x;</span><br><span class="line">    *x=*y;</span><br><span class="line">    *y=t-a/b*(*y);</span><br><span class="line">    <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h3 id="参考学习"><a href="#参考学习" class="headerlink" title="参考学习"></a>参考学习</h3><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1gY411d7Z1/">超硬核FFT快速傅里叶变换讲解，高效进行高精度乘法运算！ - Bilibili</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1EM41117Dv/">最讨厌做算法题的时候出现浮点数了，有什么方法可以避免？斐波那契数列和FFT均可适用！ - Bilibili</a></p>
+<h3 id="参考学习">参考学习</h3>
+<p><a
+target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1gY411d7Z1/">超硬核FFT快速傅里叶变换讲解，高效进行高精度乘法运算！
+- Bilibili</a></p>
+<p><a
+target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1EM41117Dv/">最讨厌做算法题的时候出现浮点数了，有什么方法可以避免？斐波那契数列和FFT均可适用！
+- Bilibili</a></p>
 <p><a target="_blank" rel="noopener" href="https://chat.openai.com/">ChatGPT</a></p>
-<p><a target="_blank" rel="noopener" href="https://oi-wiki.org/math/poly/ntt/">快速数论变换 - OI wiki</a></p>
-<p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Finite_field/">Finite field - Wikipedia</a></p>
-<p><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/zh-cn/%E9%9B%A2%E6%95%A3%E5%82%85%E9%87%8C%E8%91%89%E8%AE%8A%E6%8F%9B%E7%9F%A9%E9%99%A3">离散傅里叶变换矩阵 - Wikipedia</a></p>
-<p><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/zh-cn/%E5%A5%87%E5%87%BD%E6%95%B8%E8%88%87%E5%81%B6%E5%87%BD%E6%95%B8#%E4%BB%A3%E6%95%B8%E7%B5%90%E6%A7%8B">奇函数与偶函数 - Wikipedia</a></p>
+<p><a target="_blank" rel="noopener" href="https://oi-wiki.org/math/poly/ntt/">快速数论变换 - OI
+wiki</a></p>
+<p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Finite_field/">Finite field -
+Wikipedia</a></p>
+<p><a
+target="_blank" rel="noopener" href="https://zh.wikipedia.org/zh-cn/%E9%9B%A2%E6%95%A3%E5%82%85%E9%87%8C%E8%91%89%E8%AE%8A%E6%8F%9B%E7%9F%A9%E9%99%A3">离散傅里叶变换矩阵
+- Wikipedia</a></p>
+<p><a
+target="_blank" rel="noopener" href="https://zh.wikipedia.org/zh-cn/%E5%A5%87%E5%87%BD%E6%95%B8%E8%88%87%E5%81%B6%E5%87%BD%E6%95%B8#%E4%BB%A3%E6%95%B8%E7%B5%90%E6%A7%8B">奇函数与偶函数
+- Wikipedia</a></p>
 
                 
                 <p class="end">__END__</p>
