@@ -42,8 +42,10 @@ MySpine.prototype = {
             }
             e(this.widgetContainer, i.styles.widget),
             e(this.voiceText, i.styles.voiceText);
-            this.widgetContainer.style.position = 'absolute';
-            this.widgetContainer.style.zIndex = '999999';    
+            this.widgetContainer.style.position = 'fixed';
+            this.widgetContainer.style.zIndex = '999999';
+            this.widgetContainer.style.left = '10px';
+            this.widgetContainer.style.bottom = '10px';
             t = new spine.SkeletonJsonConverter(t,1);
             t.convertToJson(),
             new spine.SpineWidget(this.widgetContainer,{
@@ -107,6 +109,14 @@ MySpine.prototype = {
         })
     },
     initDragging: function() {
+        // 初始化位置：将bottom定位转换为top定位
+        if (this.widgetContainer.style.bottom && !this.widgetContainer.style.top) {
+            const bottomValue = parseInt(this.widgetContainer.style.bottom);
+            const topValue = window.innerHeight - this.widgetContainer.offsetHeight - bottomValue;
+            this.widgetContainer.style.top = topValue + "px";
+            this.widgetContainer.style.bottom = "auto";
+        }
+        
         function i(t) {
             var e = document.documentElement.scrollLeft
               , i = document.documentElement.scrollTop;
