@@ -70,51 +70,107 @@
         <div id="article">
             <div class="toc"></div>
             <div class="article-body">
-                <h3 id="更新日志"><a class="markdownIt-Anchor" href="#更新日志"></a> 更新日志</h3>
+                <h3 id="更新日志">更新日志</h3>
 <ul>
 <li><code>20251101</code>：更新到动调抓包</li>
 <li><code>20251102</code>：</li>
 </ul>
-<h3 id="资源解包"><a class="markdownIt-Anchor" href="#资源解包"></a> 资源解包</h3>
+<h3 id="资源解包">资源解包</h3>
 <p>直接使用 MT 解包就能看到几乎所有资源文件，没有任何难度</p>
-<h3 id="代码逆向"><a class="markdownIt-Anchor" href="#代码逆向"></a> 代码逆向</h3>
+<h3 id="代码逆向">代码逆向</h3>
 <p>使用 Jadx 反编译后发现，只有少得可怜的几行代码</p>
-<p><img src="/image/articles/Swarm-Sync-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0.assets/image-20251101150936733.png" alt="image-20251101150936733" /></p>
-<p>经过研究，Vedal 用的应该是 React Native 开发的 app，其主要代码逻辑是被编译于 <code>./assets/index.android.bundle</code> 文件的 JavaScript</p>
+<figure>
+<img
+src="/image/articles/Swarm-Sync-逆向笔记.assets/image-20251101150936733.png"
+alt="image-20251101150936733" />
+<figcaption aria-hidden="true">image-20251101150936733</figcaption>
+</figure>
+<p>经过研究，Vedal 用的应该是 React Native 开发的
+app，其主要代码逻辑是被编译于 <code>./assets/index.android.bundle</code>
+文件的 JavaScript</p>
 <p>以前没接触过这方面的技术栈，走一步看一步</p>
-<p>打开该文件，版本号是 0x60 即 96，是较新的版本，原始 js 应该已经被编译和一些混淆处理了</p>
-<p><img src="/image/articles/Swarm-Sync-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0.assets/image-20251101151332342.png" alt="image-20251101151332342" /></p>
-<p>可以使用 <a target="_blank" rel="noopener" href="https://github.com/bongtrop/hbctool">bongtrop/hbctool</a> 工具对 <code>index.android.bundle</code> 进行解析，但是该工具已经不支持 96 版本，找到了支持 96 版本的工具 <a target="_blank" rel="noopener" href="https://github.com/izadgot/hbctool">izadgot/hbctool</a> 可以解析出字节码，另外一个工具 <a target="_blank" rel="noopener" href="https://github.com/P1sec/hermes-dec">P1sec/hermes-dec</a> 可以一定程度上反编译为 js</p>
+<p>打开该文件，版本号是 0x60 即 96，是较新的版本，原始 js
+应该已经被编译和一些混淆处理了</p>
+<figure>
+<img
+src="/image/articles/Swarm-Sync-逆向笔记.assets/image-20251101151332342.png"
+alt="image-20251101151332342" />
+<figcaption aria-hidden="true">image-20251101151332342</figcaption>
+</figure>
+<p>可以使用 <a
+target="_blank" rel="noopener" href="https://github.com/bongtrop/hbctool">bongtrop/hbctool</a> 工具对
+<code>index.android.bundle</code> 进行解析，但是该工具已经不支持 96
+版本，找到了支持 96 版本的工具 <a
+target="_blank" rel="noopener" href="https://github.com/izadgot/hbctool">izadgot/hbctool</a>
+可以解析出字节码，另外一个工具 <a
+target="_blank" rel="noopener" href="https://github.com/P1sec/hermes-dec">P1sec/hermes-dec</a>
+可以一定程度上反编译为 js</p>
 <p>看一下反编译后的 JavaScript</p>
-<p><img src="/image/articles/Swarm-Sync-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0.assets/image-20251101152016592.png" alt="image-20251101152016592" /></p>
+<figure>
+<img
+src="/image/articles/Swarm-Sync-逆向笔记.assets/image-20251101152016592.png"
+alt="image-20251101152016592" />
+<figcaption aria-hidden="true">image-20251101152016592</figcaption>
+</figure>
 <p>呃呃，虽然可读性依然几乎不可读，但是至少聊胜于无吧（？</p>
 <p>这条路估计走不通了，但是可以为后面动态调试做点准备</p>
-<h3 id="动调抓包"><a class="markdownIt-Anchor" href="#动调抓包"></a> 动调抓包</h3>
-<p>龟龟没做 x86 适配，可恶，模拟器用不了了（除非 ARM Windows + ARM MuMu）</p>
+<h3 id="动调抓包">动调抓包</h3>
+<p>龟龟没做 x86 适配，可恶，模拟器用不了了（除非 ARM Windows + ARM
+MuMu）</p>
 <p>HttpCanary 无效，抓不到</p>
-<p>手边的真机没太搞明白 root，使用 <code>MitmProxy</code>抓包只能抓到一部分的 https，Swarm Sync 恰好抓不到：</p>
-<p><img src="/image/articles/Swarm-Sync-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0.assets/image-20251101152720885.png" alt="image-20251101152720885" /></p>
-<p>不过至少知道了可能是国内的 IoT 平台——<a target="_blank" rel="noopener" href="https://www.tuya.com/cn/">涂鸦智能</a></p>
-<p>好在最后找到了 r0ysue 师傅超强的通杀脚本 <a target="_blank" rel="noopener" href="https://github.com/r0ysue/r0capture">r0ysue/r0capture</a>，需要配置低版本 frida 的环境，如 <code>15.2.2</code>，然后执行</p>
+<p>手边的真机没太搞明白 root，使用
+<code>MitmProxy</code>抓包只能抓到一部分的 https，Swarm Sync
+恰好抓不到：</p>
+<figure>
+<img
+src="/image/articles/Swarm-Sync-逆向笔记.assets/image-20251101152720885.png"
+alt="image-20251101152720885" />
+<figcaption aria-hidden="true">image-20251101152720885</figcaption>
+</figure>
+<p>不过至少知道了可能是国内的 IoT 平台——<a
+target="_blank" rel="noopener" href="https://www.tuya.com/cn/">涂鸦智能</a></p>
+<p>好在最后找到了 r0ysue 师傅超强的通杀脚本 <a
+target="_blank" rel="noopener" href="https://github.com/r0ysue/r0capture">r0ysue/r0capture</a>，需要配置低版本
+frida 的环境，如 <code>15.2.2</code>，然后执行</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python .\r0capture.py -U <span class="string">&quot;Swarm Sync&quot;</span> -p test.pcap</span><br></pre></td></tr></table></figure>
 <p>抓包示例：</p>
-<p><img src="/image/articles/Swarm-Sync-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0.assets/image-20251101162934376.png" alt="image-20251101162934376" /></p>
+<figure>
+<img
+src="/image/articles/Swarm-Sync-逆向笔记.assets/image-20251101162934376.png"
+alt="image-20251101162934376" />
+<figcaption aria-hidden="true">image-20251101162934376</figcaption>
+</figure>
 <p>非常难懂，感觉还是会有很大难度</p>
 <p>具体明天到货再研究研究</p>
-<p><em><s>不过明天好像有 N1CTF 来着（？</s></em></p>
-<h3 id="局域网抓包"><a class="markdownIt-Anchor" href="#局域网抓包"></a> 局域网抓包</h3>
+<p><em><del>不过明天好像有 N1CTF 来着（？</del></em></p>
+<h3 id="局域网抓包">局域网抓包</h3>
 <p>连接电脑热点，发现熔岩灯设备</p>
-<p><img src="./Swarm-Sync-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0.assets/image-20251102220103793.png" alt="image-20251102220103793" /></p>
+<figure>
+<img src="./Swarm-Sync-逆向笔记.assets/image-20251102220103793.png"
+alt="image-20251102220103793" />
+<figcaption aria-hidden="true">image-20251102220103793</figcaption>
+</figure>
 <p>抓包</p>
-<p><img src="./Swarm-Sync-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0.assets/image-20251102221452939.png" alt="image-20251102221452939" /></p>
+<figure>
+<img src="./Swarm-Sync-逆向笔记.assets/image-20251102221452939.png"
+alt="image-20251102221452939" />
+<figcaption aria-hidden="true">image-20251102221452939</figcaption>
+</figure>
 <p>如图，正常情况下，有如下几种通信：</p>
-<ol>
-<li>每 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn></mrow><annotation encoding="application/x-tex">5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">5</span></span></span></span> 秒，LavaLamp 向局域网 <code>255.255.255.255</code> 广播信息</li>
-<li>每 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>60</mn></mrow><annotation encoding="application/x-tex">60</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">6</span><span class="mord">0</span></span></span></span> 秒，LavaLamp 向远程服务器 <code>8.***.***.247</code> TLS 通信一次（推测为 涂鸦智能 IOT 平台）</li>
+<ol type="1">
+<li>每 <span class="math inline">\(5\)</span> 秒，LavaLamp 向局域网
+<code>255.255.255.255</code> 广播信息</li>
+<li>每 <span class="math inline">\(60\)</span> 秒，LavaLamp 向远程服务器
+<code>8.***.***.247</code> TLS 通信一次（推测为 涂鸦智能 IOT 平台）</li>
 </ol>
 <p>扫一下 LavaLamp，有且只有一个 TCP 端口开放</p>
-<p><img src="./Swarm-Sync-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0.assets/image-20251102224517556.png" alt="image-20251102224517556" /></p>
-<p>搜索一下，发现一个工具 <a target="_blank" rel="noopener" href="https://github.com/jasonacox/tinytuya">jasonacox/tinytuya</a></p>
+<figure>
+<img src="./Swarm-Sync-逆向笔记.assets/image-20251102224517556.png"
+alt="image-20251102224517556" />
+<figcaption aria-hidden="true">image-20251102224517556</figcaption>
+</figure>
+<p>搜索一下，发现一个工具 <a
+target="_blank" rel="noopener" href="https://github.com/jasonacox/tinytuya">jasonacox/tinytuya</a></p>
 
                 
                 <p class="end">__END__</p>
