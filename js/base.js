@@ -64,6 +64,66 @@ function Base() {
         '有的人25岁就死了，只是到75岁才埋葬'
     ];
 
+    this.getRandomHeaderText = function() {
+        let listIndex = tools.randomNum(0, headerTextList.length - 1);
+        return {
+            text: headerTextList[listIndex],
+            subtext: ''
+        };
+    };
+
+    this.getCustomBannerText = function() {
+        if (!Array.isArray(window.config.CustomBannerTextList) || window.config.CustomBannerTextList.length === 0) {
+            return null;
+        }
+
+        let validList = window.config.CustomBannerTextList.map(function(item) {
+            if (typeof item === 'string') {
+                let text = item.trim();
+                return text ? {text: text, subtext: ''} : null;
+            }
+
+            if (item && typeof item === 'object') {
+                let text = typeof item.text === 'string' ? item.text.trim() : '';
+                let subtext = typeof item.subtext === 'string' ? item.subtext.trim() : '';
+                return text ? {text: text, subtext: subtext} : null;
+            }
+
+            return null;
+        }).filter(Boolean);
+
+        if (validList.length === 0) {
+            return null;
+        }
+
+        let listIndex = tools.randomNum(0, validList.length - 1);
+        return validList[listIndex];
+    };
+
+    this.renderHomeBannerText = function(item) {
+        $('#hitokoto').text(item.text).css('display', '-webkit-box');
+
+        if (item.subtext) {
+            $('#hitokotoAuthor').text(item.subtext).show();
+        } else {
+            $('#hitokotoAuthor').text('').hide();
+        }
+
+        return true;
+    };
+
+    this.renderOtherBannerText = function(item) {
+        $('.Chinese').text(item.text).css('display', '-webkit-box');
+
+        if (item.subtext) {
+            $('.English').text(item.subtext).show();
+        } else {
+            $('.English').text('').hide();
+        }
+
+        return true;
+    };
+
 //----------------------------------- 初始化 -----------------------------------------//
 
     /**
@@ -616,8 +676,15 @@ function Base() {
     this.setHitokoto = function() {
 
         if (window.config.HomeBannerText !== '') {
-            $('#hitokoto').text(window.config.HomeBannerText).css('display', '-webkit-box');
-            return true;
+            return script.renderHomeBannerText({
+                text: window.config.HomeBannerText,
+                subtext: ''
+            });
+        }
+
+        let customBannerText = script.getCustomBannerText();
+        if (customBannerText) {
+            return script.renderHomeBannerText(customBannerText);
         }
 
         let settings = {
@@ -632,8 +699,7 @@ function Base() {
                 $('#hitokoto').text(response.data.content).show();
                 $('#hitokotoAuthor').text('《' + response.data.origin.title + '》 - ' + response.data.origin.dynasty + ' - ' + response.data.origin.author).show();
             } else {
-                let listIndex = tools.randomNum(0, headerTextList.length - 1);
-                $('#hitokoto').text(headerTextList[listIndex]).show();
+                script.renderHomeBannerText(script.getRandomHeaderText());
             }
             return false;
         });
@@ -680,8 +746,15 @@ function Base() {
     this.setOtherHitokoto = function() {
 
         if (window.config.OtherBannerText !== '') {
-            $('.Chinese').text(window.config.OtherBannerText).css('display', '-webkit-box');
-            return true;
+            return script.renderOtherBannerText({
+                text: window.config.OtherBannerText,
+                subtext: ''
+            });
+        }
+
+        let customBannerText = script.getCustomBannerText();
+        if (customBannerText) {
+            return script.renderOtherBannerText(customBannerText);
         }
 
         let settings = {
@@ -700,8 +773,7 @@ function Base() {
                 $('.Chinese').text(response.note).show();
                 $('.English').text(response.content).show();
             } else {
-                let listIndex = tools.randomNum(0, headerTextList.length - 1);
-                $('.Chinese').text(headerTextList[listIndex]).show();
+                script.renderOtherBannerText(script.getRandomHeaderText());
             }
             return false;
         });
