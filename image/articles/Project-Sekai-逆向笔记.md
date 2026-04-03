@@ -18,6 +18,8 @@ pjsk逆向唯一神贴: [Project SEKAI 逆向 - 笔记归档](https://mos9527.co
 
 - `20250410` 完成了 `静态解包` `第三方工具` 等部分的大致整理
 - `20250411` 完成了 `提取 global-metadata.dat` 部分的整理
+- 忘了
+- `20260331` 完成了 `修改 API-url`
 
 ## 静态解包
 
@@ -25,7 +27,7 @@ pjsk逆向唯一神贴: [Project SEKAI 逆向 - 笔记归档](https://mos9527.co
 
 ## 动态分析
 
-### 提取 `global-metadata.dat` (成功)
+### `cn-3.4.0` 提取 `global-metadata.dat` (成功)
 
 参考 [Project SEKAI 逆向 - 笔记归档](https://mos9527.com/posts/pjsk/archive-20240105/)
 
@@ -300,6 +302,67 @@ void* il2cpp::vm::MetadataLoader::LoadMetadataFile(const char* fileName)
 这段代码的特征和文章 [某手游il2cpp逆向分析----libtprt保护](https://www.52pojie.cn/thread-2010789-1-1.html) 中的例子极其相似，对照进行分析
 
 `v7 = osFileOpen((__int64)v14, 3, 1u, 1u, 0, &error);` 读取文件后紧跟着异常处理，然后进 `utilsMemoryMappedFileMap`
+
+### (jp-6.4.0) 提取 `global-metadata.dat`
+
+`30360401` 补
+
+取 `base.apk` 中的 `global-metadata.dat`，发现一样有加密
+
+绘制直方图：
+
+![jp-6.4.0 base.apk global-metadata.dat 直方图](/image/articles/Project-Sekai-逆向笔记.assets/image-20260401124308026.png)
+
+观察直方图，仍然有明显的统计特征，信息熵较小，排除 `AES/DES`，仍然考虑传统的循环异或
+
+`dd` 或 GG 提取内存中的 `global-metadata.dat`
+
+```shell
+:/proc/5511 # cat maps | grep "metadata"
+708946341000-708947cc8000 rw-p 00000000 08:23 5114671                    /storage/emulated/0/Android/data/com.sega.pjsekai/files/il2cpp/Metadata/global-metadata.dat
+```
+
+将 dumper 出来的和 apk 中的进行 xor，辅助脚本如下
+
+```python
+import sys
+
+
+def main():
+    if len(sys.argv) != 4:
+        print(f"Usage: python {sys.argv[0]} <file1> <file2> <output>")
+        raise SystemExit(1)
+
+    file1, file2, output = sys.argv[1], sys.argv[2], sys.argv[3]
+    chunk_size = 1024 * 1024
+
+    with open(file1, "rb") as f1, open(file2, "rb") as f2, open(output, "wb") as out:
+        while True:
+            b1 = f1.read(chunk_size)
+            b2 = f2.read(chunk_size)
+
+            if not b1 or not b2:
+                break
+
+            n = min(len(b1), len(b2))
+            out.write(bytes(x ^ y for x, y in zip(b1[:n], b2[:n])))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+验证了循环异或的猜想，但密钥已不是当年的密钥
+
+![dump xor apk](/image/articles/Project-Sekai-逆向笔记.assets/image-20260401125419160.png)
+
+于是将异或结果文件与 apk 中的文件再次异或（或截断 dumper 中文件），可以得到明文 `global-metadata.dat`，这里给出明文的 MD5 供复现参考 `724056876AEA9BC85D514378F504627A`
+
+再从 `/data/app/xxx/xxx/lib/arm64/libil2cpp.so` 提取了一份 `libil2cpp.so` 并从内存中提取了两份看起来像的 `ELF` 文件
+
+经 `il2cppdumper` 验证，`/data/app/` 中的 `libil2cpp.so` 是最合适且有效的
+
+导入 IDA 分析并重建符号即可
 
 ### 获取 AES key (成功)
 
@@ -872,7 +935,7 @@ GET /api/suitemasterfile/5.6.0.30/06_bb2194a8ea47722555dd056f8cc2a2d4563ea2041d4
 
 经测验，虽然携带了 `X-Session-Token`，但实际上需要的是包含完整 `CloudFront` 的 `Cookie` 
 
-![image-20250915154830036](./Project-Sekai-逆向笔记.assets/image-20250915154830036.png)
+![](/image/articles/Project-Sekai-逆向笔记.assets/image-20250915154830036.png)
 
 *~~巨长的数据，编码后都有这么大，霓虹人太可怕了~~*
 
@@ -880,7 +943,7 @@ GET /api/suitemasterfile/5.6.0.30/06_bb2194a8ea47722555dd056f8cc2a2d4563ea2041d4
 
 警告：此脚本存在封号风险，切勿使用
 
-![image-20250927142928501](./Project-Sekai-逆向笔记.assets/image-20250927142928501.png)
+![image-20250927142928501](/image/articles/Project-Sekai-逆向笔记.assets/image-20250927142928501.png)
 
 ```python
 from mitmproxy import http
@@ -1002,7 +1065,7 @@ def request(flow: http.HTTPFlow) -> None:
 
 成品图：
 
-![image-20251018163712881](./Project-Sekai-逆向笔记.assets/image-20251018163712881.png)
+![](/image/articles/Project-Sekai-逆向笔记.assets/image-20251018163712881.png)
 
 继续可以搞一个 **大** 一点的图
 
@@ -1061,9 +1124,431 @@ def request(flow: http.HTTPFlow) -> None:
 
 成果图
 
-![MuMu-20251018-165502-676](./Project-Sekai-逆向笔记.assets/MuMu-20251018-165502-676.png)
+![](/image/articles/Project-Sekai-逆向笔记.assets/MuMu-20251018-165502-676.png)
 
 不过预览图应该是仅自己可见的，要想真改还得想办法注入名片
+
+### 一点碎碎念
+
+20260331，在给游戏「东方夜雀食堂」做了五个多月的 mod 后，最近得空回来看一下，但是发现最近怎么 PS 遍地飞了？？小小打探一下，好像没比我的进度多多少（？
+
+这太怪了，而且这大张旗鼓的，有点可怕。
+
+不过在有群 u 说开源方面我的进度是最快的，我还是很开心的 `heart~`
+
+### 修改 API-url
+
+这是做 PS 不得不品的一环
+
+托朋友关系，要到一份 `API-url` 改到 `127.0.0.1` 的样本，`CN-6.0.0`
+
+这位朋友说是和 codex 斗智斗勇出来的，也不知道具体方法，解包简单 `grep` 下
+
+```shell
+└─# grep -rn "127.0.0.1" .
+grep: ./assets/bin/Data/Managed/Metadata/global-metadata.dat: binary file matches
+./assets/url_config.json:4:    "passport_host_merge": "127.0.0.1:18081",
+./assets/url_config.json:6:    "passport_host": "127.0.0.1:18081",
+./assets/url_config.json:13:    "bsdk_server_url": "http://127.0.0.1:18081/",
+./assets/url_config.json:14:    "gsdk_server_url": "http://127.0.0.1:18081/",
+./assets/url_config.json:15:    "gsdk_server_url_sandbox": "http://127.0.0.1:18081/",
+./assets/url_config.json:22:    "bsdk_host": "127.0.0.1:18081",
+./assets/url_config.json:24:    "gsdk_host": "127.0.0.1:18081",
+./assets/url_config.json:26:    "gsdk_host_sandbox": "127.0.0.1:18081",
+./assets/url_config.json:35:    "geas_host": "http://127.0.0.1:18081/",
+./assets/url_config.json:36:    "gs_server_url": "http://127.0.0.1:18081/",
+./assets/url_config.json:38:    "gs_server_url_sandbox": "http://127.0.0.1:18081/",
+```
+
+`url_config`？谁家好人把这么重要的配置直接塞在 apk 里面？经检查 `JP-6.4.0` 不包含该文件
+
+字节代理的两个服的 `url_config` 位置如下
+
+```
+cn-6.0.0.apk/assets/url_config.json
+tw-6.0.0.xapk/installtime.apk/assets/url_config.json
+```
+
+猜测该文件只是字节渠道服所设计，日服不应有该文件
+
+因此首先考虑审计 `cn-6.0.0` 的渠道层，推测有关 `HOST` 表的内容位于 `Java` 层而不在 `il2cpp` 层
+
+```java
+package com.bytedance.ttgame.core.init;
+
+/* loaded from: classes3.dex */
+public final class ConfigParserCommon {
+    private static final String CONFIG_FILE_NAME = "config.json";
+    private static final String CONFIG_URL_NAME = "url_config.json";
+    public static ChangeQuickRedirect changeQuickRedirect;
+    private static Gson sGson = new Gson();
+    private Config config;
+    private JsonObject mConfigJson;
+    private JsonObject mSdkJson;
+    
+    private void parseUrlConfigJsonFile(Context context) throws IOException {
+        if (PatchProxy.proxy(new Object[]{context}, this, changeQuickRedirect, false, "f979d4a46b8a655f4dc6cc3eb20fc165") != null) {
+            return;
+        }
+        InputStream inputStreamOpen = null;
+        try {
+            try {
+                try {
+                    inputStreamOpen = context.getAssets().open(CONFIG_URL_NAME);
+                    byte[] bArr = new byte[inputStreamOpen.available()];
+                    inputStreamOpen.read(bArr);
+                    JsonObject asJsonObject = ((JsonObject) new JsonParser().parse(new String(bArr, "UTF-8"))).getAsJsonObject("urls");
+                    if (asJsonObject != null) {
+                        this.config.urlConfig = (HashMap) sGson.fromJson(asJsonObject, new TypeToken<HashMap<String, Object>>() { // from class: com.bytedance.ttgame.core.init.ConfigParserCommon.3
+                        }.getType());
+                    }
+                    if (inputStreamOpen != null) {
+                        inputStreamOpen.close();
+                    }
+                } catch (Throwable th) {
+                    if (inputStreamOpen != null) {
+                        try {
+                            inputStreamOpen.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    throw th;
+                }
+            } catch (Exception e2) {
+                e2.printStackTrace();
+                if (inputStreamOpen != null) {
+                    inputStreamOpen.close();
+                }
+            }
+        } catch (IOException e3) {
+            e3.printStackTrace();
+        }
+    }
+}
+
+```
+
+可以看到是字节渠道服负责读取了 `url_config.json`，而这在 `jp-6.4.0` 是没有的。
+
+分析 `jp-6.4.0`，在 `java` 层似乎找不到任何 `API_URL` 的配置，因此逆 `libil2cpp.so`
+
+使用之前解密的 `libil2cpp.so` 和 `global-metadata.dat` 通过 `il2cppDumper` 解包
+
+用 `dnspy` 打开 `DummyDll/Assembly-CSharp.dll`，容易找到
+
+```c#
+// Sekai.EnvironmentConfig
+private static string apiUrlBase;
+private static string sekaiGameAPIDomain;
+private static AppInfoResponse appInfo;
+
+// Token: 0x17000B56 RID: 2902
+// (get) Token: 0x06004E80 RID: 20096 RVA: 0x00002050 File Offset: 0x00000250
+[Token(Token = "0x17000B56")]
+public static string ApiUrlBase
+{
+    [Token(Token = "0x6004E80")]
+    [Address(RVA = "0x5B0FF24", Offset = "0x5B0BF24", VA = "0x5B0FF24")]
+    get
+    {
+        if (string.IsNullOrEmpty(apiUrlBase))
+        {
+            if (appInfo != null)
+            {
+                SetupApiEndpoint(appInfo.domain);
+            }
+            else
+            {
+                LogUtility.LogError("appInfoを取得していないためAssetBundleInfoの実行ができません", Array.Empty<object>());
+                return string.Empty;
+            }
+        }
+        return apiUrlBase;
+    }
+}
+
+// Token: 0x06004E97 RID: 20119 RVA: 0x00002053 File Offset: 0x00000253
+[Token(Token = "0x6004E97")]
+[Address(RVA = "0x5B100BC", Offset = "0x5B0C0BC", VA = "0x5B100BC")]
+public static void SetupApiEndpoint(string domain)
+{
+    apiUrlBase = string.Format("https://{0}/api/", domain);
+    sekaiGameAPIDomain = string.Format("https://{0}/", domain);
+}
+```
+
+```c#
+// Sekai.GetAppInfoAPId
+// Token: 0x06003783 RID: 14211 RVA: 0x00002050 File Offset: 0x00000250
+[Token(Token = "0x6003783")]
+[Address(RVA = "0x5A0AC50", Offset = "0x5A06C50", VA = "0x5A0AC50", Slot = "9")]
+public override string Execute(APICore<EmptyRequest, AppInfoResponse>.OnAPIEventHandler onCallBackResponse)
+{
+    if (onCallBackResponse != null)
+    {
+        this.onFinishAPI = (APICore<EmptyRequest, AppInfoResponse>.OnAPIEventHandler)Delegate.Combine(this.onFinishAPI, onCallBackResponse);
+    }
+    string api = $"https://game-version.sekai.colorfulpalette.org/{EnvironmentConfig.ClientVersionAPI}/{EnvironmentConfig.ClientAppHash}";
+    return base.CallFullURL(api, APICoreParam.Method.GET, null, new APICore<EmptyRequest, AppInfoResponse>.OnAPIEventHandler(this.OnCallBack), null, true, null);
+}
+
+// Token: 0x06003784 RID: 14212 RVA: 0x00002053 File Offset: 0x00000253
+[Token(Token = "0x6003784")]
+[Address(RVA = "0x5A0ADF0", Offset = "0x5A06DF0", VA = "0x5A0ADF0")]
+private void OnCallBack(APICore<EmptyRequest, AppInfoResponse> apiCore)
+{
+    if (apiCore.Result.State == APIState.SuccessComplete)
+    {
+        EnvironmentConfig.SetAppInfo(apiCore.Response);
+    }
+    this.onFinishAPI?.Invoke(apiCore);
+}
+```
+
+因此考虑修改 `https://game-version.sekai.colorfulpalette.org/{0}/{1}`，但是如何改呢？改 dnspy 肯定是不行的，似乎并没有一个方法可以将 `Assembly-CSharp` 重新打包回 apk，那么回顾一下现有各文件的来源：
+
+```mermaid
+graph LR
+    APK[apk]
+
+    SO[libil2cpp.so]
+    META1[global-metadata.dat]
+    META2[global-metadata.dat]
+
+    PROCESS[il2cppDumper]
+    DLL[Assembly-CSharp.dll]
+
+    APK <--> SO
+    APK <--> META1
+
+    META1 <--> |XOR key| META2
+
+    META2 --> PROCESS
+    SO --> PROCESS
+    PROCESS --> DLL
+```
+
+能改的无非是改原 `libil2cpp.so` 和 `global-metadata.dat`，那么这个地址位于哪里呢？`VERSION_API_URL_BASE_FORMAT` 作为字符串常量，自然是存放在 `global-metadata.dat` 中，这涉及到 `global-metadata.dat` 的作用原理之一，中文互联网已有很多讨论，此文不再赘述。
+
+![Patch-1](/image/articles/Project-Sekai-逆向笔记.assets/image-20260403102903193.png)
+
+![image-20260403102958390](/image/articles/Project-Sekai-逆向笔记.assets/image-20260403102958390.png)
+
+一共有两处需要修改的地方，且为了避免修改原有地址长度进而导致整个 `global-metadata.dat` 失效，此处使用 `aaaa` 字符串进行**占位填**充
+
+保存，异或加密，再打包进 `APK/assets/bin/Data/Managed/Metadata/global-metadata.dat` 中，签名安装，抓包测试
+
+很不幸，在正常的游戏中，我们是能够看到一个对 `GET https://game-version.sekai.colorfulpalette.org/6.4.0/6bad6856-ef61-eb43-47f5-dbc95fc5967c` 的请求，然而在修改的安装包中，无法看到有这样一个 `GET http://192.168.0.100:5000/` 的请求。
+
+无法看到本应有的 `GET` 请求，说明我们找的切入点没问题；游戏无法正常发送请求，说明仍有某些点没有考虑到。
+
+不过如果有 Android 相关开发经验，也许会记得，从某个版本起，Android 默认禁止了 HTTP 明文传输，也就是必须通过 HTTPS 进行通信。
+
+为此，重新改包为 `https` 地址进行测试，成功抓到请求：
+
+![metamiku.top](/image/articles/Project-Sekai-逆向笔记.assets/image-20260403103857049.png)
+
+然而我们是正经审计，不能让其通入外网，更不可能有 HTTPS 了，因此重新将内网地址打包进去，并在 `AndroidMainfest` 中配置 `cleartextTrafficPermitted="true"`
+
+可惜还是不行，抓日志发现
+
+```shell
+PS E:\> adb logcat -s Unity
+--------- beginning of main
+04-03 11:30:19.810 14331 14421 W Unity   : Non-secure network connections disabled in Player Settings
+04-03 11:30:19.810 14331 14421 W Unity   : UnityEngine.Networking.UnityWebRequest:SendWebRequest()
+04-03 11:30:19.810 14331 14421 W Unity   : Sekai.<SendRequest>d__35:MoveNext()
+04-03 11:30:19.810 14331 14421 W Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+04-03 11:30:19.810 14331 14421 W Unity   : Sekai.APIManager:CallAPIFull(String, Method, A, OnAPIEventHandler, Boolean, APIExecuteBehaviourParam, OnAPIEventHandler, Dictionary`2)
+04-03 11:30:19.810 14331 14421 W Unity   : Sekai.APICaller`2:CallFullURL(String, Method, A, OnAPIEventHandler, OnAPIEventHandler, Boolean, Dictionary`2)
+04-03 11:30:19.810 14331 14421 W Unity   : Sekai.GetAppInfoAPI:Execute(OnAPIEventHandler)
+04-03 11:30:19.810 14331 14421 W Unity   : Sekai.APIExecutor:Execute(IAPICaller`2, OnAPIEventHandler, Action, AfterErrorDetectionType, AfterInterruptionType, Boolean, Boolean, Action)
+04-03 11:30:19.810 14331 14421 W Unity   : CP.API.APIUtility:ExecuteAppInfoAPI(Action`1, Boolean)
+04-03 11:30:19.810 14331 14421 W Unity   : Sekai.TitleController:Login(Action`1)
+04-03 11:30:19.810 14331 14421 W Unity   : CP.<DelayCallCore>d__12:MoveNext()
+04-03 11:30:19.810 14331 14421 W Unity   : UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+04-03 11:30:19.810 14331 14421 W Unity   :
+04-03 11:30:19.810 14331 14421 W Unity   : [ line -146986952]
+04-03 11:30:19.810 14331 14421 W Unity   :
+```
+
+应该是 `HTTP` 请求被 Unity 层拦下了，审计 `libunity.so`，该文件也无加密
+
+`libunity.so` 并不大，可以全局搜索字符串
+
+```c
+__int64 __fastcall sub_936FAC(__int64 a1)
+{
+  _QWORD *v2; // x19
+  _QWORD *v3; // x0
+  int v5; // w8
+  __int64 *v6; // x9
+  _QWORD v7[5]; // [xsp+0h] [xbp-C0h] BYREF
+  __int128 v8; // [xsp+28h] [xbp-98h]
+  int v9; // [xsp+38h] [xbp-88h]
+  __int64 v10; // [xsp+40h] [xbp-80h]
+  char v11; // [xsp+48h] [xbp-78h]
+  __int64 v12; // [xsp+50h] [xbp-70h]
+  int v13; // [xsp+58h] [xbp-68h]
+  char *v14; // [xsp+60h] [xbp-60h]
+  char *v15; // [xsp+68h] [xbp-58h]
+  __int64 v16[4]; // [xsp+70h] [xbp-50h] BYREF
+  char v17; // [xsp+90h] [xbp-30h]
+  unsigned int v18; // [xsp+94h] [xbp-2Ch]
+  __int64 v19; // [xsp+98h] [xbp-28h]
+
+  v2 = (_QWORD *)(a1 + 136);
+  v19 = *(_QWORD *)(_ReadStatusReg(ARM64_SYSREG(3, 3, 13, 0, 2)) + 40);
+  if ( *(_BYTE *)(a1 + 168) == 1 )
+    v3 = (_QWORD *)(a1 + 136);
+  else
+    v3 = (_QWORD *)*v2;
+  if ( (unsigned int)sub_64B840(v3, "http:", 5LL) )
+    return 1LL;
+  if ( *(_BYTE *)(a1 + 168) != 1 )
+    v2 = (_QWORD *)*v2;
+  if ( (sub_937134(v2) & 1) != 0 )
+    return 1LL;
+  v5 = *(_DWORD *)(sub_DD534C() + 716);
+  if ( v5 )
+  {
+    if ( v5 != 1 )
+      return 1LL;
+    sub_64C614(v16, "Non-secure HTTP connections disabled in release builds");
+    v11 = 1;
+    v6 = (__int64 *)v16[0];
+    if ( v17 == 1 )
+      v6 = v16;
+    v12 = 0LL;
+    v13 = 0;
+    v9 = 0;
+    v7[2] = &byte_15D8D4;
+    v7[3] = &byte_15D8D4;
+    v14 = &byte_15D8D4;
+    v15 = &byte_15D8D4;
+    v7[4] = &byte_15D8D4;
+    v8 = xmmword_17DB60;
+    v7[0] = v6;
+    v7[1] = &byte_15D8D4;
+    v10 = 0LL;
+    sub_DCEB10(v7);
+    if ( !v17 )
+      sub_4BADF4(v16[0], v18, &byte_15D8D4, 518LL);
+  }
+  return 0LL;
+}
+```
+
+还可以发现一处
+
+```c
+char *__fastcall sub_937134(const char *a1)
+{
+  char *result; // x0
+  char *v2; // x19
+  char *v3; // x20
+  size_t v4; // x21
+  char *v5; // x0
+  size_t v6; // x20
+  _BYTE *v7; // x0
+
+  result = strstr(a1, "://");
+  if ( result )
+  {
+    v2 = result + 3;
+    if ( !result[3] )
+      return 0LL;
+    result = strchr(result + 3, 47);
+    if ( !result )
+      return result;
+    v3 = result;
+    v4 = result - v2;
+    if ( result == v2 )
+    {
+      return 0LL;
+    }
+    else
+    {
+      v5 = (char *)memchr(v2, 64, v4);
+      if ( v5 )
+        v6 = v3 - (v5 + 1);
+      else
+        v6 = v4;
+      if ( v5 )
+        v2 = v5 + 1;
+      v7 = memchr(v2, 58, v6);
+      if ( v7 )
+        v6 = v7 - v2;
+      if ( !strncmp(v2, "localhost", v6) )
+        return (_BYTE *)(&dword_0 + 1);
+      else
+        return (char *)(strncmp(v2, "127.0.0.1", v6) == 0);
+    }
+  }
+  return result;
+}
+```
+
+`sub_937134` 中确认了 `127.0.0.1` `localhost` 的白名单，而 `sub_936FAC` 校验了 `HTTP`
+
+可以考虑先改 URL 为 `127.0.0.1:8831`，然后用 `adb reverse tcp:8831 tcp:8831` 反向映射，在电脑用 `ncat` 来接请求验证
+
+我这里用的是 8831 端口，成功接收到 `HTTP` 请求如图
+
+![adb reverse](/image/articles/Project-Sekai-逆向笔记.assets/image-20260403122711025.png)
+
+对图中该请求固定返回
+
+```json
+{
+    profile = "production",
+    assetbundleHostHash = "cf2d2388",
+    domain = "127.0.0.1:8831"
+}
+```
+
+但抓包发现该请求并没有成功被发出
+
+重新认真审计 `libil2cpp.so` 可以发现，有一点之前忽略了
+
+```c#
+// Token: 0x06004E97 RID: 20119 RVA: 0x00002053 File Offset: 0x00000253
+[Token(Token = "0x6004E97")]
+[Address(RVA = "0x5B100BC", Offset = "0x5B0C0BC", VA = "0x5B100BC")]
+public static void SetupApiEndpoint(string domain)
+{
+    apiUrlBase = string.Format("https://{0}/api/", domain);
+    sekaiGameAPIDomain = string.Format("https://{0}/", domain);
+}
+```
+
+如果 `domain="127.0.0.1:8831"` ，则格式化后得到 `https://127.0.0.1:8831/api/` 和 `https://127.0.0.1:8831`，其中 `https` 和 `127.0.0.1` 一起出现似乎构成了一个不好的 URL，因此进一步修改这两个字符串：
+
+![Patch-2](/image/articles/Project-Sekai-逆向笔记.assets/image-20260404002642752.png)
+
+如此一来，原本应该发给 `https://production-game-api.sekai.colorfulpalette.org/api/xxxx` 的请求转而发给 `http://127.0.0.1/AAAA/xxxx`，相应地接收 API 即可。
+
+至此，成功将所需权限从 root(用于安装 mitm 所需的 CA 证书) 降级到 adb (用于转发请求)
+
+### 防护意见
+
+在修改 `API-URL` 这一段攻击链中，主要涉及以下几个方面的问题：
+
+1. `global-metadata.dat` 解密过于简单且**可逆**，导致攻击者可以自由解密和重加密
+2. `libil2cpp.so` 明文存于 `apk` 中，易于解密、审计和篡改
+3. `apk` 缺少强签名校验，很容易被篡改
+
+对此我有几个不成熟的修复方案仅供参考，
+
+1. 最简单最粗暴的方法，给 `apk` 加壳加强签名校验，篡改后无法安装
+2. 使用**非对称加密**来保护 `global-metadata.dat`，使攻击者无法重加密，将弱点转移至保护较短的、更便于隐藏和混淆的解密公钥上
+3. 关键常量字符串混淆或拼接，增加攻击者的审计难度
+4. 移除对回环地址的白名单
+5. 对代码进行混淆，避免攻击者轻易找到切入点（我总记得以前是有混淆的来着？）
+6. 移除 `url_config.json`，将渠道服和非渠道服的差异化配置放在代码中进行编译时区分，而不是放在外部文件中
+7. 使用极短的域名来获取实际 API 地址，限制攻击者的篡改范围
+
 
 ## PS 编写
 
@@ -1074,6 +1559,10 @@ def request(flow: http.HTTPFlow) -> None:
 ### Sekai Viewer
 
 众所周知的 [Sekai Viewer](https://sekai.best)
+
+### Moe Sekai
+
+非常好用的新一代数据查看器 [Moe Sekai](https://pjsk.moe/)
 
 ### SekaiTools
 
