@@ -19,7 +19,7 @@ pjsk逆向唯一神贴: [Project SEKAI 逆向 - 笔记归档](https://mos9527.co
 - `20250410` 完成了 `静态解包` `第三方工具` 等部分的大致整理
 - `20250411` 完成了 `提取 global-metadata.dat` 部分的整理
 - 忘了
-- `20260331` 完成了 `修改 API-url`
+- `20260404` 完成了 `修改 API-url`
 
 ## 静态解包
 
@@ -1140,9 +1140,13 @@ def request(flow: http.HTTPFlow) -> None:
 
 这是做 PS 不得不品的一环
 
-托朋友关系，要到一份 `API-url` 改到 `127.0.0.1` 的样本，`CN-6.0.0`
+> **注意，以下方法并不是可以也绝不是允许非法公开分发版本的制作方式，仅仅是技术讨论以及对下文“防护意见”的讨论**
+> 任何人不允许进行实际的公开分发行为
 
-这位朋友说是和 codex 斗智斗勇出来的，也不知道具体方法，解包简单 `grep` 下
+
+偶然搞到一份 `API-url` 改到 `127.0.0.1` 的样本，`CN-6.0.0`
+
+解包简单 `grep` 下
 
 ```shell
 └─# grep -rn "127.0.0.1" .
@@ -1160,7 +1164,7 @@ grep: ./assets/bin/Data/Managed/Metadata/global-metadata.dat: binary file matche
 ./assets/url_config.json:38:    "gs_server_url_sandbox": "http://127.0.0.1:18081/",
 ```
 
-`url_config`？谁家好人把这么重要的配置直接塞在 apk 里面？经检查 `JP-6.4.0` 不包含该文件
+<s>`url_config`？谁家好人把这么重要的配置直接塞在 apk 里面？经检查 `JP-6.4.0` 不包含该文件</s>
 
 字节代理的两个服的 `url_config` 位置如下
 
@@ -1306,6 +1310,8 @@ private void OnCallBack(APICore<EmptyRequest, AppInfoResponse> apiCore)
 }
 ```
 
+*注：以上代码为手工复原，并非直接反编译得到，因此可能存在细微差别*
+
 因此考虑修改 `https://game-version.sekai.colorfulpalette.org/{0}/{1}`，但是如何改呢？改 dnspy 肯定是不行的，似乎并没有一个方法可以将 `Assembly-CSharp` 重新打包回 apk，那么回顾一下现有各文件的来源：
 
 ```mermaid
@@ -1331,9 +1337,9 @@ graph LR
 
 能改的无非是改原 `libil2cpp.so` 和 `global-metadata.dat`，那么这个地址位于哪里呢？`VERSION_API_URL_BASE_FORMAT` 作为字符串常量，自然是存放在 `global-metadata.dat` 中，这涉及到 `global-metadata.dat` 的作用原理之一，中文互联网已有很多讨论，此文不再赘述。
 
-![Patch-1](/image/articles/Project-Sekai-逆向笔记.assets/image-20260403102903193.png)
+![](/image/articles/Project-Sekai-逆向笔记.assets/image-20260403102903193.png)
 
-![image-20260403102958390](/image/articles/Project-Sekai-逆向笔记.assets/image-20260403102958390.png)
+![](/image/articles/Project-Sekai-逆向笔记.assets/image-20260403102958390.png)
 
 一共有两处需要修改的地方，且为了避免修改原有地址长度进而导致整个 `global-metadata.dat` 失效，此处使用 `aaaa` 字符串进行**占位填**充
 
@@ -1347,7 +1353,7 @@ graph LR
 
 为此，重新改包为 `https` 地址进行测试，成功抓到请求：
 
-![metamiku.top](/image/articles/Project-Sekai-逆向笔记.assets/image-20260403103857049.png)
+![](/image/articles/Project-Sekai-逆向笔记.assets/image-20260403103857049.png)
 
 然而我们是正经审计，不能让其通入外网，更不可能有 HTTPS 了，因此重新将内网地址打包进去，并在 `AndroidMainfest` 中配置 `cleartextTrafficPermitted="true"`
 
@@ -1496,7 +1502,7 @@ char *__fastcall sub_937134(const char *a1)
 
 我这里用的是 8831 端口，成功接收到 `HTTP` 请求如图
 
-![adb reverse](/image/articles/Project-Sekai-逆向笔记.assets/image-20260403122711025.png)
+![](/image/articles/Project-Sekai-逆向笔记.assets/image-20260403122711025.png)
 
 对图中该请求固定返回
 
@@ -1525,11 +1531,37 @@ public static void SetupApiEndpoint(string domain)
 
 如果 `domain="127.0.0.1:8831"` ，则格式化后得到 `https://127.0.0.1:8831/api/` 和 `https://127.0.0.1:8831`，其中 `https` 和 `127.0.0.1` 一起出现似乎构成了一个不好的 URL，因此进一步修改这两个字符串：
 
-![Patch-2](/image/articles/Project-Sekai-逆向笔记.assets/image-20260404002642752.png)
+![](/image/articles/Project-Sekai-逆向笔记.assets/image-20260404002642752.png)
 
 如此一来，原本应该发给 `https://production-game-api.sekai.colorfulpalette.org/api/xxxx` 的请求转而发给 `http://127.0.0.1/AAAA/xxxx`，相应地接收 API 即可。
 
 至此，成功将所需权限从 root(用于安装 mitm 所需的 CA 证书) 降级到 adb (用于转发请求)
+
+不过，使用 `AAA` 进行占位填充并不是一个很优雅的解决方案，可以利用 C# 格式化字符串的特性(即使已被 il2cpp)，我们知道
+
+```c#
+string.Format("abc{0}ghi", "def"); // 输出 "abcdefghi"
+```
+
+但是我们可以构造模板
+
+```c#
+string.Format("abc{00}ghi", "def"); // 同样输出 "abcdefghi"
+```
+
+因此我们可以巧妙地利用多个 `0` 来占位，来替换使用 `AAA` 进行占位填充的做法，来得到一个更优雅的解决方案
+
+不过这只是 C# 层面的推测，但经过实际测试，il2cpp 似乎也保留了 C# 这种字符串格式化的特性
+
+因此最终所做 patch 如下：
+
+![](/image/articles/Project-Sekai-逆向笔记.assets/image-20260404123644668.png)
+
+![](/image/articles/Project-Sekai-逆向笔记.assets/image-20260404123700083.png)
+
+![](/image/articles/Project-Sekai-逆向笔记.assets/image-20260404123729915.png)
+
+
 
 ### 防护意见
 
@@ -1548,6 +1580,9 @@ public static void SetupApiEndpoint(string domain)
 5. 对代码进行混淆，避免攻击者轻易找到切入点（我总记得以前是有混淆的来着？）
 6. 移除 `url_config.json`，将渠道服和非渠道服的差异化配置放在代码中进行编译时区分，而不是放在外部文件中
 7. 使用极短的域名来获取实际 API 地址，限制攻击者的篡改范围
+8. 使用自行签发的证书，拒绝其他包括根证书在内的证书，增加攻击者的测试难度
+9. 参考其他游戏，如「明⚪⚪舟」，有极为严苛的环境检查，从开始即限制攻击者的抓包分析和修改测试
+10. 现有逻辑是极为标准的 Unity il2cpp 游戏模型，可以考虑对敏感逻辑进行特殊化处理，减少同质化攻击面
 
 
 ## PS 编写

@@ -508,18 +508,10 @@ apk，那么回顾一下现有各文件的来源：</p>
 作为字符串常量，自然是存放在 <code>global-metadata.dat</code>
 中，这涉及到 <code>global-metadata.dat</code>
 的作用原理之一，中文互联网已有很多讨论，此文不再赘述。</p>
-<figure>
-<img
-src="/image/articles/Project-Sekai-逆向笔记.assets/image-20260403102903193.png"
-alt="Patch-1" />
-<figcaption aria-hidden="true">Patch-1</figcaption>
-</figure>
-<figure>
-<img
-src="/image/articles/Project-Sekai-逆向笔记.assets/image-20260403102958390.png"
-alt="image-20260403102958390" />
-<figcaption aria-hidden="true">image-20260403102958390</figcaption>
-</figure>
+<p><img
+src="/image/articles/Project-Sekai-逆向笔记.assets/image-20260403102903193.png" /></p>
+<p><img
+src="/image/articles/Project-Sekai-逆向笔记.assets/image-20260403102958390.png" /></p>
 <p>一共有两处需要修改的地方，且为了避免修改原有地址长度进而导致整个
 <code>global-metadata.dat</code> 失效，此处使用 <code>aaaa</code>
 字符串进行<strong>占位填</strong>充</p>
@@ -535,12 +527,8 @@ alt="image-20260403102958390" />
 <p>不过如果有 Android 相关开发经验，也许会记得，从某个版本起，Android
 默认禁止了 HTTP 明文传输，也就是必须通过 HTTPS 进行通信。</p>
 <p>为此，重新改包为 <code>https</code> 地址进行测试，成功抓到请求：</p>
-<figure>
-<img
-src="/image/articles/Project-Sekai-逆向笔记.assets/image-20260403103857049.png"
-alt="metamiku.top" />
-<figcaption aria-hidden="true">metamiku.top</figcaption>
-</figure>
+<p><img
+src="/image/articles/Project-Sekai-逆向笔记.assets/image-20260403103857049.png" /></p>
 <p>然而我们是正经审计，不能让其通入外网，更不可能有 HTTPS
 了，因此重新将内网地址打包进去，并在 <code>AndroidMainfest</code> 中配置
 <code>cleartextTrafficPermitted="true"</code></p>
@@ -559,12 +547,8 @@ alt="metamiku.top" />
 <code>adb reverse tcp:8831 tcp:8831</code> 反向映射，在电脑用
 <code>ncat</code> 来接请求验证</p>
 <p>我这里用的是 8831 端口，成功接收到 <code>HTTP</code> 请求如图</p>
-<figure>
-<img
-src="/image/articles/Project-Sekai-逆向笔记.assets/image-20260403122711025.png"
-alt="adb reverse" />
-<figcaption aria-hidden="true">adb reverse</figcaption>
-</figure>
+<p><img
+src="/image/articles/Project-Sekai-逆向笔记.assets/image-20260403122711025.png" /></p>
 <p>对图中该请求固定返回</p>
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    profile = <span class="string">&quot;production&quot;</span><span class="punctuation">,</span></span><br><span class="line">    assetbundleHostHash = <span class="string">&quot;cf2d2388&quot;</span><span class="punctuation">,</span></span><br><span class="line">    domain = <span class="string">&quot;127.0.0.1:8831&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
 <p>但抓包发现该请求并没有成功被发出</p>
@@ -575,18 +559,31 @@ alt="adb reverse" />
 <code>https://127.0.0.1:8831</code>，其中 <code>https</code> 和
 <code>127.0.0.1</code> 一起出现似乎构成了一个不好的
 URL，因此进一步修改这两个字符串：</p>
-<figure>
-<img
-src="/image/articles/Project-Sekai-逆向笔记.assets/image-20260404002642752.png"
-alt="Patch-2" />
-<figcaption aria-hidden="true">Patch-2</figcaption>
-</figure>
+<p><img
+src="/image/articles/Project-Sekai-逆向笔记.assets/image-20260404002642752.png" /></p>
 <p>如此一来，原本应该发给
 <code>https://production-game-api.sekai.colorfulpalette.org/api/xxxx</code>
 的请求转而发给 <code>http://127.0.0.1/AAAA/xxxx</code>，相应地接收 API
 即可。</p>
 <p>至此，成功将所需权限从 root(用于安装 mitm 所需的 CA 证书) 降级到 adb
 (用于转发请求)</p>
+<p>不过，使用 <code>AAA</code>
+进行占位填充并不是一个很优雅的解决方案，可以利用 C#
+格式化字符串的特性(即使已被 il2cpp)，我们知道</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">string</span>.Format(<span class="string">&quot;abc&#123;0&#125;ghi&quot;</span>, <span class="string">&quot;def&quot;</span>); <span class="comment">// 输出 &quot;abcdefghi&quot;</span></span><br></pre></td></tr></table></figure>
+<p>但是我们可以构造模板</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">string</span>.Format(<span class="string">&quot;abc&#123;00&#125;ghi&quot;</span>, <span class="string">&quot;def&quot;</span>); <span class="comment">// 同样输出 &quot;abcdefghi&quot;</span></span><br></pre></td></tr></table></figure>
+<p>因此我们可以巧妙地利用多个 <code>0</code> 来占位，来替换使用
+<code>AAA</code> 进行占位填充的做法，来得到一个更优雅的解决方案</p>
+<p>不过这只是 C# 层面的推测，但经过实际测试，il2cpp 似乎也保留了 C#
+这种字符串格式化的特性</p>
+<p>因此最终所做 patch 如下：</p>
+<p><img
+src="/image/articles/Project-Sekai-逆向笔记.assets/image-20260404123644668.png" /></p>
+<p><img
+src="/image/articles/Project-Sekai-逆向笔记.assets/image-20260404123700083.png" /></p>
+<p><img
+src="/image/articles/Project-Sekai-逆向笔记.assets/image-20260404123729915.png" /></p>
 <h3 id="防护意见">防护意见</h3>
 <p>在修改 <code>API-URL</code>
 这一段攻击链中，主要涉及以下几个方面的问题：</p>
