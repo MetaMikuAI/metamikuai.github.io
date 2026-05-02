@@ -65,19 +65,17 @@ MySpine.prototype = {
     spineWidgetSuccessCallback: function(t) {
         var e = ()=>{
             this.triggerEvents.forEach(t=>window.removeEventListener(t, e)),
-            this.triggerEvents.forEach(t=>window.addEventListener(t, this.changeIdleAnimation.bind(this))),
-            this.initVoiceComponents(),
-            this.initWidgetActions(),
-            this.initDragging(),
-            this.widget.play(),
-            this.playVoice(this.getVoice("start")),
-            this.widgetContainer.style.display = "block"
+            this.playVoice(this.getVoice("start"))
         }
         ;
         this.widget = t,
-        this.widget.pause(),
-        this.widgetContainer.style.display = "none",
-        this.triggerEvents.forEach(t=>window.addEventListener(t, e))
+        this.initVoiceComponents(),
+        this.initWidgetActions(),
+        this.initDragging(),
+        this.triggerEvents.forEach(t=>window.addEventListener(t, this.changeIdleAnimation.bind(this))),
+        this.triggerEvents.forEach(t=>window.addEventListener(t, e)),
+        this.widgetContainer.style.display = "block",
+        this.widget.play()
     },
     initVoiceComponents: function() {
         this.voiceText.setAttribute("class", "myspine-voice-text"),
@@ -134,8 +132,8 @@ MySpine.prototype = {
         var n = (t,e)=>{
             t = Math.max(0, t),
             e = Math.max(0, e),
-            t = Math.min(document.body.clientWidth - this.widgetContainer.clientWidth, t),
-            e = Math.min(document.body.clientHeight - this.widgetContainer.clientHeight, e),
+            t = Math.min(window.innerWidth - this.widgetContainer.clientWidth, t),
+            e = Math.min(window.innerHeight - this.widgetContainer.clientHeight, e),
             this.widgetContainer.style.left = t + "px",
             this.widgetContainer.style.top = e + "px"
         }
