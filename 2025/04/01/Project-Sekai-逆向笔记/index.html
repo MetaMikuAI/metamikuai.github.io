@@ -76,6 +76,7 @@
 <p>pjsk逆向唯一神贴: <a target="_blank" rel="noopener" href="https://mos9527.com/posts/pjsk/archive-20240105/">Project SEKAI 逆向 - 笔记归档</a></p>
 <p>↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑</p>
 <h2 id="更新日志"><a class="markdownIt-Anchor" href="#更新日志"></a> 更新日志</h2>
+<p>如果您已有相关经验，可以跳过试错较多且略显杂乱的 <code>第一章</code> 部分，直接阅读 <code>第二章</code>，我将从全新的视角去审计整个游戏，也希望我的分析能给您带来新的收获。我自己也觉得整篇博客杂乱无章，但是我还是很喜欢事无巨细地记录每段研究，我会在第二章尽可能优化语言和结构，还请见谅。</p>
 <ul>
 <li><code>20250410</code> 完成了 <code>静态解包</code> <code>第三方工具</code> 等部分的大致整理</li>
 <li><code>20250411</code> 完成了 <code>提取 global-metadata.dat</code> 部分的整理</li>
@@ -83,8 +84,8 @@
 <li><code>20260404</code> 完成了 <code>修改 API-url</code></li>
 <li><code>20260604</code> 修正了对 <code>ffa3bd6214f33fe73cb72fee2262bedb</code> 的解释</li>
 <li><code>20260605</code> 开启 <code>第二章</code></li>
+<li><code>20260606</code> 新建 <code>mod 制作</code> 章节，记录 <code>FusionCore</code> 和 <code>搭建 mod 编译环境并测试 mod</code></li>
 </ul>
-<p>注，如果您已有相关经验，可以跳过试错较多且略显杂乱的 <code>第一章</code> 部分，直接阅读 <code>第二章</code>，我将从全新的视角去审计整个游戏，也希望我的分析能给您带来新的收获。</p>
 <h1 id="第一章-学习与试错"><a class="markdownIt-Anchor" href="#第一章-学习与试错"></a> 第一章-学习与试错</h1>
 <h2 id="静态解包"><a class="markdownIt-Anchor" href="#静态解包"></a> 静态解包</h2>
 <p>参见：<a target="_blank" rel="noopener" href="https://www.bilibili.com/opus/579098944556614370">【世界计划 多彩舞台】PJSK游戏资源解包教程-补充资料：新版</a></p>
@@ -433,8 +434,54 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">00000000  b8 3e f6 ad f2 86 ab bc 3f 56 39 8a fa 08 f1 45  |¸&gt;ö.ò.«¼?V9.ú.ñE|</span><br><span class="line">00000010  fe 5e e1 1c 7b 9b 49 2c f3 c1 3d c6 c9 00 0e 73  |þ^á.&#123;.I,óÁ=ÆÉ..s|</span><br><span class="line">00000020  cb 96 42 51 23 e5 56 37 ba 59 50 da 2e 63 f8 a3  |Ë.BQ#åV7ºYPÚ.cø£|</span><br><span class="line">00000030  63 4a 69 7f ba c1 ee 1c f4 c9 ba 31 48 e5 f2 3e  |cJi.ºÁî.ôÉº1Håò&gt;|</span><br><span class="line">00000040  47 c6 bf 64 c6 9f 21 18 07 a9 61 22 4b 6f fe 8f  |GÆ¿dÆ.!..©a&quot;Koþ.|</span><br><span class="line">00000050  c8 99 63 7f 97 8f b8 09 a8 25 5d 5a 2b 25 ee d5  |È.c...¸.¨%]Z+%îÕ|</span><br><span class="line">00000060  66 11 92 68 a3 93 dc c3 28 50 77 11 60 cb d1 84  |f..h£.ÜÃ(Pw.`ËÑ.|</span><br><span class="line">00000070  cb 2a 68 af 82 73 a7 b8 0d b6 bb a1 42 c7 ed e1  |Ë*h¯.s§¸.¶»¡BÇíá|</span><br></pre></td></tr></table></figure>
 <p>解密后的 <code>global-metadata.dat</code> 的 MD5 为 <code>182796373B5708F00115E409A9120730</code></p>
 <p>ps: 感慨啊，当年跟 mos9527 老师一步步走的教程尚且十分吃力，现在已能分分钟找到，也算是自己的进步了。</p>
+<h2 id="网络审计"><a class="markdownIt-Anchor" href="#网络审计"></a> 网络审计</h2>
+<p><s><code>20260606</code> 删，感觉写的有点太直白了，先删了）</s></p>
 <h2 id="代码审计"><a class="markdownIt-Anchor" href="#代码审计"></a> 代码审计</h2>
 <p>即将进行的新的篇章。</p>
+<h2 id="mod-制作"><a class="markdownIt-Anchor" href="#mod-制作"></a> mod 制作</h2>
+<p><code>20260606</code> 记</p>
+<p><strong>注：以下测试均在断网环境的模拟，未接入服务器，未造成任何影响，仅供学习和参考，不提供任何技术支持。</strong></p>
+<p>在今天之前我也很难以想象我能做到这一步，但是确实成功了。</p>
+<p>搭建好基础环境后，编写就和普通 PC 端的 BepInEx il2cpp mod 一样了。</p>
+<h3 id="fusioncore"><a class="markdownIt-Anchor" href="#fusioncore"></a> FusionCore</h3>
+<p>感谢项目：<a target="_blank" rel="noopener" href="https://github.com/All-Of-Us-Mods/FusionCore">All-Of-Us-Mods/FusionCore</a></p>
+<p>这是我针对性修复一些问题后的 fork 版本：<a target="_blank" rel="noopener" href="https://github.com/MetaMikuAI/FusionCore">MetaMikuAI/FusionCore</a></p>
+<p>当然我不可能提供可以直接运行的版本，需要额外做如下：</p>
+<ol>
+<li>请按照 README 自行添加对应包名</li>
+<li>请按照 README 自行编译并安装</li>
+<li>启动后首先<strong>关闭</strong>设置中的 <code>Download unstripped libunity</code> 选项</li>
+<li>将<strong>解密后</strong>的 <code>global-metadata.dat</code> 放到 <code>/sdcard/FusionCore/&lt;包名&gt;/</code> 下 程</li>
+</ol>
+<p>我在编译原仓库时，发现有几个问题，并在我的 fork 仓库被修复或解决：</p>
+<ol>
+<li>游戏直接闪退：FusionCore 误将 <code>global-metadata.dat</code> 当明文读取而崩溃，这在 <a target="_blank" rel="noopener" href="https://github.com/MetaMikuAI/FusionCore/commit/db6d754106e7ea596eec1d440a24cc5790f07d82">Add global metadata override during bootstrap</a> 被解决，请将解密后的 <code>global-metadata.dat</code> 放到 <code>/sdcard/FusionCore/&lt;包名&gt;/</code> 下</li>
+<li>游戏可以正常加载，但有关 Google Play 的一些图标等资源加载错误：<code>FusionCore</code> 包装后导致和 Google Play 通信的一些问题，这在 <a target="_blank" rel="noopener" href="https://github.com/MetaMikuAI/FusionCore/commit/800b879a03fcb065c88862a833f82b5d5d2f9aa9">Fix launcher context wrapping for game resources</a> 被修复。</li>
+<li>游戏可以正常加载，但是只能在标题页，点击标题无法登录游戏：与第二条类似的问题，这在 <a target="_blank" rel="noopener" href="https://github.com/MetaMikuAI/FusionCore/commit/faf7eee3201c6aa060b163ea2b62fe6d7c9667c9">Fix Unity launch context and Firebase discovery</a> 中被修复。</li>
+</ol>
+<p>游戏正常加载，甚至可以直接带起来 UnityExplorer</p>
+<p><img src="/image/articles/Project-Sekai-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0.assets/image-20260606234951694.png" alt="mini live 和 mini miku…" /></p>
+<h3 id="搭建-mod-编译环境并测试-mod"><a class="markdownIt-Anchor" href="#搭建-mod-编译环境并测试-mod"></a> 搭建 mod 编译环境并测试 mod</h3>
+<p>与正常 il2cpp 游戏的 bepinex 环境搭建方法类似，首先至少运行过一次 FusionCore，然后复制 <code>/sdcard/FusionCore/&lt;包名&gt;/BepInEx</code> 到电脑上，这个目录即是编译 mod 所需的「依赖」。</p>
+<p>我先前在为《东方夜雀食堂》制作 mod 时顺便写了一组很详细的开发文档，而且流程几乎一模一样。因此这里只会简单介绍一下流程，<strong>有很多细节的省略</strong>，推荐将博客和开发文档对照着阅读。<a target="_blank" rel="noopener" href="https://doc.meta-mystia.izakaya.cc/developer_guide/hello_world_1.html#hello-world-%E5%85%B6%E4%B8%80">MetaMystia文档 - hello world 其一</a>。但是注意，其中 .NET 版本应当选择 10.0，除此之外无其他不同。</p>
+<p>在这里我直接用命令行创建。<code>classlib</code> 代表类库，用于 mod；<code>SekaiModTest</code> 代表项目名，任取。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dotnet new classlib <span class="literal">-n</span> SekaiModTest</span><br></pre></td></tr></table></figure>
+<p>创建好后请确保 <code>SekaiModTest.csproj</code> 的 <code>TargetFramework</code> 为 <code>net10.0</code>，并添加引用(先前导出的 <code>BepInEx/core/xxx.dll</code> 和 <code>BepInEx/interop/xxx.dll</code>)，这里不再过多介绍。</p>
+<p>按我个人习惯，<code>Class1.cs</code> 改名为 <code>Plugin.cs</code>，并编写代码：</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> BepInEx;</span><br><span class="line"><span class="keyword">using</span> BepInEx.Unity.IL2CPP;</span><br><span class="line"><span class="keyword">using</span> HarmonyLib;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> Sekai.Core.Live;</span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> <span class="title">SekaiModTest</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[<span class="meta">BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)</span>]</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">Plugin</span> : <span class="title">BasePlugin</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Plugin Instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Plugin</span>()</span></span><br><span class="line">    &#123;</span><br><span class="line">        Instance = <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">override</span> <span class="keyword">void</span> <span class="title">Load</span>()</span></span><br><span class="line">    &#123;</span><br><span class="line">        Log.LogWarning(<span class="string">$&quot;Plugin <span class="subst">&#123;MyPluginInfo.PLUGIN_NAME&#125;</span>-v<span class="subst">&#123;MyPluginInfo.PLUGIN_VERSION&#125;</span> is loaded!&quot;</span>);</span><br><span class="line">        Log.LogWarning(<span class="string">$&quot;Made by MetaMiku&quot;</span>);</span><br><span class="line">        Log.LogWarning(<span class="string">$&quot;https://github.com/MetaMikuAI/SekaiModTest&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">var</span> harmony = <span class="keyword">new</span> Harmony(MyPluginInfo.PLUGIN_GUID);</span><br><span class="line">            harmony.PatchAll(<span class="keyword">typeof</span>(ScoreLogicPatch));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span></span><br><span class="line">        &#123;</span><br><span class="line">            Log.LogError(<span class="string">&quot;FAILED to Apply Hooks!&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">[<span class="meta">HarmonyPatch(typeof(Sekai.Core.Live.ScoreLogic))</span>]</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">ScoreLogicPatch</span></span><br><span class="line">&#123;</span><br><span class="line">    [<span class="meta">HarmonyPatch(nameof(ScoreLogic.GetNoteScoreFactor))</span>]</span><br><span class="line">    [<span class="meta">HarmonyPostfix</span>]</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">GetNoteScoreFactor_Postfix</span>(<span class="params"><span class="keyword">ref</span> <span class="built_in">float</span> __result</span>)</span></span><br><span class="line">    &#123;</span><br><span class="line">        Plugin.Instance.Log.LogWarning(<span class="string">$&quot;GetNoteScoreFactor called, setting result to 100.0f&quot;</span>);</span><br><span class="line">        __result = <span class="number">100.0f</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这段代码的大概含义是：</p>
+<ol>
+<li>模组加载时打印三行日志，并向 <code>Sekai.Core.Live.ScoreLogic</code> 应用钩子。</li>
+<li>在 <code>Sekai.Core.Live.ScoreLogic.GetNoteScoreFactor</code> 调用结束返回结果时，将结果修改为 100.0f</li>
+</ol>
+<p>编译</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dotnet build</span><br></pre></td></tr></table></figure>
+<p>将 <code>电脑/.../BepInEx/plugins/SekaiModTest.dll</code> 文件复制到 Android 的对应位置即可。</p>
+<p>运行 FusionCore 中的游戏，启动 solo live，可以看到音符得分被大幅降低。</p>
+<p><img src="/image/articles/Project-Sekai-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0.assets/image-20260607005908231.png" alt="" /></p>
+<p>如果没有跟上，可以直接从 <a target="_blank" rel="noopener" href="https://github.com/MetaMikuAI/SekaiModTest">MetaMikuAI/SekaiModTest</a> 获取现成代码，并注意修改 <code>SekaiModTest.csproj</code> 中的 <code>BepInExPath</code> 项。</p>
+<p>课后作业：合理使用 Harmony Patch，使得音符在 miss 后不会扣血。</p>
+<p><em><strong>注入有风险，测试需谨慎。</strong></em></p>
 
                 
                 <p class="end">__END__</p>
