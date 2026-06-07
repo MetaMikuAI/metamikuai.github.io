@@ -85,6 +85,7 @@
 <li><code>20260604</code> 修正了对 <code>ffa3bd6214f33fe73cb72fee2262bedb</code> 的解释</li>
 <li><code>20260605</code> 开启 <code>第二章</code></li>
 <li><code>20260606</code> 新建 <code>mod 制作</code> 章节，记录 <code>FusionCore</code> 和 <code>搭建 mod 编译环境并测试 mod</code></li>
+<li><code>20260607</code> 完成 <code>代码审计</code> 章节的 <code>逆向工具</code> 和 <code>逆向分析准备</code> 两个小节</li>
 </ul>
 <h1 id="第一章-学习与试错"><a class="markdownIt-Anchor" href="#第一章-学习与试错"></a> 第一章-学习与试错</h1>
 <h2 id="静态解包"><a class="markdownIt-Anchor" href="#静态解包"></a> 静态解包</h2>
@@ -178,7 +179,7 @@
 <p>这段代码的特征和文章 <a target="_blank" rel="noopener" href="https://www.52pojie.cn/thread-2010789-1-1.html">某手游il2cpp逆向分析----libtprt保护</a> 中的例子极其相似，对照进行分析</p>
 <p><code>v7 = osFileOpen((__int64)v14, 3, 1u, 1u, 0, &amp;error);</code> 读取文件后紧跟着异常处理，然后进 <code>utilsMemoryMappedFileMap</code></p>
 <h3 id="jp-640-提取-global-metadatadat"><a class="markdownIt-Anchor" href="#jp-640-提取-global-metadatadat"></a> jp-6.4.0 提取 <code>global-metadata.dat</code></h3>
-<p><code>30360401</code> 补</p>
+<p><code>20260401</code> 补</p>
 <p>取 <code>base.apk</code> 中的 <code>global-metadata.dat</code>，发现一样有加密</p>
 <p>绘制直方图：</p>
 <p><img src="/image/articles/Project-Sekai-%E9%80%86%E5%90%91%E7%AC%94%E8%AE%B0.assets/image-20260401124308026.png" alt="jp-6.4.0 base.apk global-metadata.dat 直方图" /></p>
@@ -437,7 +438,42 @@
 <h2 id="网络审计"><a class="markdownIt-Anchor" href="#网络审计"></a> 网络审计</h2>
 <p><s><code>20260606</code> 删，感觉写的有点太直白了，先删了）</s></p>
 <h2 id="代码审计"><a class="markdownIt-Anchor" href="#代码审计"></a> 代码审计</h2>
-<p>即将进行的新的篇章。</p>
+<p><code>20260607</code> 记</p>
+<p>在 AI Agent 飞速发展的今天，想快速审计一个 il2cpp 游戏已经不是难事，如果能配合地用好工具，一定能达到事半功倍的效果。这里将首先分享一下个人为此准备的一套工具和工作流，然后按各个功能模块进行粗浅地分析，以供大家参考。这部分<strong>可能有 AI 生成总结</strong>的部分（因为 AI 真的比我总结的更高效、更准确、更有价值），此类内容会在所属小节开头进行标注。</p>
+<h3 id="逆向工具"><a class="markdownIt-Anchor" href="#逆向工具"></a> 逆向工具</h3>
+<p>在去年，我可能会说，下面的工具只需配置一部分即可。但是在现在，接下来的每一个工具都是我经过大量实践总结出的一套模式，如果以后有进步也会同步进行更新。</p>
+<ul>
+<li>
+<p>010-Editor：用于查看文件的十六进制，有助于恢复 <code>global-metadata.dat</code>，也可使用其他工具替代。</p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/Perfare/Il2CppDumper">Il2CppDumper</a>：il2cpp 逆向最权威的工具，用于解析 <code>global-metadata.dat</code> 并导出字符串表以及 DummyDll 等重要产物。</p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/dnSpy/dnSpy">dnSpy</a>：用于粗略审计 <code>DummyDll/*.dll</code>，导出为桩代码项目可供 AI Agent 快速审计。</p>
+</li>
+<li>
+<p>IDA Pro：用于对 <code>libil2cpp.so</code> 进行反汇编分析，并在必要时进行动态调试。对于 il2cpp 游戏，IDA 是理解底层执行逻辑的重要工具。</p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/mrexodia/ida-pro-mcp">IDA-Pro-MCP</a>：该插件允许AI Agent通过MCP接口访问IDA数据库，可用于辅助定位函数、理解控制流或加速分析过程。</p>
+</li>
+</ul>
+<h3 id="逆向分析准备"><a class="markdownIt-Anchor" href="#逆向分析准备"></a> 逆向分析准备</h3>
+<ol>
+<li>恢复 <code>global-metadata.dat</code>，老生常谈的话题了，应该非常简单了吧）大家都会了。</li>
+<li>找到 <code>libil2cpp.so</code>，一般在 安装包里的 <code>lib/arm64-v8a/libil2cpp.so</code></li>
+<li>使用 Il2CppDumper 读取  <code>global-metadata.dat</code> 和  <code>libil2cpp.so</code>，等待一会可以得到一些产物。如果报错，检查是否是二者有未解开的加密或损坏。</li>
+<li>将 Il2CppDumper 生成的 <code>DummyDll/Assembly-CSharp.dll</code> 导入dnSpy。通过该文件，我们可以较为直观地查看游戏逻辑中的类定义、字段名称以及方法签名，并定位其虚拟地址。</li>
+<li>在 dnSpy 中选中 <code>Assembly-CSharp.dll</code>，并通过 <code>文件 &gt; 导出到工程</code> 将整个项目进行导出，导出的代码不含具体逻辑，只含结构，以供 AI Agent 进行标准的参考。</li>
+<li>使用 IDA Pro 打开 <code>libil2cpp.so</code>，等待其完成初始自动分析（首次加载耗时会非常长*<s>，建议导入后直接睡到天明</s>*）。</li>
+<li>关闭 IDA，切记勾选 <code>Collect garbage</code> 而<strong>不要勾选</strong> <code>Don't SAVE the database</code>，备份产物 <code>libil2cpp.so.i64</code>。</li>
+<li>重新打开  <code>libil2cpp.so.i64</code>，点击 <code>File -&gt; Script file</code>，运行 Il2CppDumper 附带的 <code>ida_with_struct_py3.py</code> 脚本。根据脚本提示，依次选择生成的 <code>script.json</code> 与 <code>il2cpp.h</code> 文件，耐心等待符号与结构信息导入完成。（这次处理耗时也会非常长*<s>，建议处理后再睡一觉到天明</s>*）。</li>
+<li>关闭 IDA，切记勾选 <code>Collect garbage</code> 而<strong>不要勾选</strong> <code>Don't SAVE the database</code>，重新备份产物 <code>libil2cpp.so.i64</code>。</li>
+<li>为 IDA 安装 IDA Pro MCP</li>
+<li>安装 skill：<a href="IL2cpp-to-csharp-skill">IL2cpp-to-csharp-skill</a></li>
+<li>打开 IDA，启用 IDA Pro MCP，将桩代码目录和 Il2CppDumper 的产物 <code>stringliteral.json</code> 路径提供给 Agent，即可让 Agent 开始逆向分析。</li>
+</ol>
 <h2 id="mod-制作"><a class="markdownIt-Anchor" href="#mod-制作"></a> mod 制作</h2>
 <p><code>20260606</code> 记</p>
 <p><strong>注：以下测试均在断网环境的模拟，未接入服务器，未造成任何影响，仅供学习和参考，不提供任何技术支持。</strong></p>
@@ -451,7 +487,7 @@
 <li>请按照 README 自行添加对应包名</li>
 <li>请按照 README 自行编译并安装</li>
 <li>启动后首先<strong>关闭</strong>设置中的 <code>Download unstripped libunity</code> 选项</li>
-<li>将<strong>解密后</strong>的 <code>global-metadata.dat</code> 放到 <code>/sdcard/FusionCore/&lt;包名&gt;/</code> 下 程</li>
+<li>将<strong>解密后</strong>的 <code>global-metadata.dat</code> 放到 <code>/sdcard/FusionCore/&lt;包名&gt;/</code> 下</li>
 </ol>
 <p>我在编译原仓库时，发现有几个问题，并在我的 fork 仓库被修复或解决：</p>
 <ol>
