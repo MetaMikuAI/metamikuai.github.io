@@ -1,0 +1,48 @@
+.myspine-spine-widget {
+    position: fixed;
+    width: 200px;
+    height: 200px;
+    left: 10px;
+    bottom: 10px;
+    z-index: 999999;
+    top: auto;
+    right: auto;
+    display: block;
+    pointer-events: auto;
+    touch-action: none;
+}
+
+.myspine-voice-text {
+    display: none !important;
+    width: 100%;
+    height: 60px;
+    position: absolute;
+    margin-top: -70px;
+    padding: 5px 5px 5px 5px;
+    line-height: 1.5;
+    color: #fff;
+    background-color: #14151685;
+    box-shadow: 0 3px 15px 2px #141516;
+    font-size: 12px;
+    text-align: left;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    transition: opacity .3s ease-in-out,height .5s ease-in-out;
+}
+/*
+.myspine-voice-text::before {
+    content: 'VOICE TEXT';
+    display: block;
+    color: #37b2ff;
+    font-weight: 700;
+}*/
+
+.myspine-voice-text {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.myspine-voice-text::-webkit-scrollbar {
+    display: none;
+}
