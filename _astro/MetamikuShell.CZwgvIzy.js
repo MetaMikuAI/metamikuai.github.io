@@ -1,0 +1,1 @@
+import{u as r,j as e,P as t,S as i,H as c}from"./StaticBackdrop.CnPVa2YK.js";function d({postListPath:s,mode:a="inner"}){const{enabled:n}=r();return e.jsxs(e.Fragment,{children:[n?e.jsx(t,{variant:"sheets"}):e.jsx(i,{}),e.jsx(c,{progress:0,activeIndex:-1,mode:a,postListPath:s})]})}export{d as MetamikuShell};
