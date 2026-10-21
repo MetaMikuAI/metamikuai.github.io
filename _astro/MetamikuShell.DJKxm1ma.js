@@ -1,0 +1,1 @@
+import{u as t,j as e,P as i,S as c,H as d}from"./StaticBackdrop.lH4EKXlK.js";function u({postListPath:s,mode:a="inner"}){const{enabled:n,ready:r}=t();return e.jsxs(e.Fragment,{children:[r&&n?e.jsx(i,{}):e.jsx(c,{}),e.jsx(d,{progress:0,activeIndex:-1,mode:a,postListPath:s})]})}export{u as MetamikuShell};
